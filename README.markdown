@@ -9,6 +9,13 @@ This emacs config has a few bells and whistles. To set up git submodule dependen
 
 Enjoy.
 
+## Emacs installation
+
+To get started with emacs
+
+- `brew update`
+- `brew install emacs --cocoa`
+
 ## Alternatives
 
 If you don't like this emacs, checkout `https://github.com/technomancy/emacs-starter-kit` or `https://github.com/overtone/emacs-live` or roll your own from scratch borrowing as you go!
