@@ -90,6 +90,9 @@
 ;; Clojure mode for ClojureScript
 (add-to-list 'auto-mode-alist '("\.cljs$" . clojure-mode))
 
+(require 'mustache-mode)
+(add-to-list 'auto-mode-alist '("\.mustache$" . mustache-mode))
+
 ;; Dont like trailing whitespaces
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
