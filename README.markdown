@@ -4,6 +4,7 @@ This emacs config has a few bells and whistles. To set up git submodule dependen
 
 - `cd ~`
 - `git clone git@github.com:MailOnline/.emacs.d.git`
+- `cd .emacs.d`
 - `git submodule init`
 - `git submodule update`
 
