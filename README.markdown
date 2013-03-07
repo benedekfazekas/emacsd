@@ -1,6 +1,16 @@
+## Emacs installation
+
+To get started with emacs
+
+- `brew update`
+- `brew install emacs --cocoa`
+- `ln -s /usr/local/Cellar/emacs/24.2/Emacs.app to /Applications/Emacs.app`
+
+You can't run emacs from the terminal. Go to the applications folder and run it from there, put it in your dock.
+
 ## Setup
 
-This emacs config has a few bells and whistles. To set up git submodule dependencies.
+Emacs config lives in ~/.emacs.d. This emacs config has a few bells and whistles. It uses git submodules so you need to initialise them.
 
 - `cd ~`
 - `git clone git@github.com:MailOnline/.emacs.d.git`
@@ -9,15 +19,6 @@ This emacs config has a few bells and whistles. To set up git submodule dependen
 - `git submodule update`
 
 Enjoy.
-
-## Emacs installation
-
-To get started with emacs
-
-- `brew update`
-- `brew install emacs --cocoa`
-
-- copy, move or symlink /usr/local/Cellar/emacs/24.2/Emacs.app to /Applications/Emacs.app
 
 ## Alternatives
 
