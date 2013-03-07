@@ -4,7 +4,7 @@ To get started with emacs
 
 - `brew update`
 - `brew install emacs --cocoa`
-- `ln -s /usr/local/Cellar/emacs/24.2/Emacs.app to /Applications/Emacs.app`
+- `ln -s /usr/local/Cellar/emacs/24.2/Emacs.app /Applications/`
 
 You can't run emacs from the terminal. Go to the applications folder and run it from there, put it in your dock.
 
