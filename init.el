@@ -8,12 +8,6 @@
                     (or (buffer-file-name) load-file-name)))
 (add-to-list 'load-path dotfiles-dir)
 
-;; Add every subdirectory of ~/.emacs.d/site-lisp to the load path
-(dolist
-    (project (directory-files (concat dotfiles-dir "site-lisp") t "\\w+"))
-  (when (file-directory-p project)
-    (add-to-list 'load-path project)))
-
 ;; ELPA
 (setq package-user-dir (concat dotfiles-dir "elpa"))
 (require 'package)
