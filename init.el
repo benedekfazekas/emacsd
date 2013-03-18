@@ -71,6 +71,7 @@
 (add-hook 'nrepl-mode-hook 'enable-paredit-mode)
 
 (setq nrepl-history-file "~/.emacs.d/nrepl-history")
+(setq nrepl-use-pretty-printing t)
 
 ;; eldoc
 (add-hook 'nrepl-interaction-mode-hook

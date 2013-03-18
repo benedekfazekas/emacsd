@@ -15,7 +15,7 @@ Emacs config lives in ~/.emacs.d. This emacs config has a few bells and whistles
 - `cd ~`
 - `git clone git@github.com:MailOnline/.emacs.d.git`
 
-As of 6d6c6f2b1630ae1af636ca06bec5410a1b5805ec, we no longer use git submodules. If you're using a revision prior to this, you need to:
+As of `6d6c6f2b1630ae1af636ca06bec5410a1b5805ec`, we no longer use git submodules. If you're using a revision prior to this, you need to:
 
 - `cd .emacs.d`
 - `git submodule init`
@@ -26,7 +26,3 @@ Enjoy.
 ## Alternatives
 
 If you don't like this emacs, checkout `https://github.com/technomancy/emacs-starter-kit` or `https://github.com/overtone/emacs-live` or roll your own from scratch borrowing as you go!
-
-## TODOs
-
-- we should probably remove use of git submodules to have a more stable, entry-level emacs - make use of ELPA or MELPA instead.
