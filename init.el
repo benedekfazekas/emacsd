@@ -8,6 +8,17 @@
                     (or (buffer-file-name) load-file-name)))
 (add-to-list 'load-path dotfiles-dir)
 
+;; Add every subdirectory of ~/.emacs.d/site-lisp to the load path
+(dolist
+    (project (directory-files (concat dotfiles-dir "site-lisp") t "\\w+"))
+  (when (file-directory-p project)
+    (add-to-list 'load-path project)))
+
+;; speedbar shows all files
+(custom-set-variables
+ '(speedbar-show-unknown-files t)
+)
+
 ;; ELPA
 (setq package-user-dir (concat dotfiles-dir "elpa"))
 (require 'package)
@@ -93,7 +104,7 @@
 
 (dolist (file '("jp-autocomplete.el"
 		"jp-ace-jump-mode.el"
-		"jp-erc.el"
+;;		"jp-erc.el"
 		"jp-multiple-cursors.el"
 		"jp-html"
 		"jp-lnf.el"))
