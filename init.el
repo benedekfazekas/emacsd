@@ -110,3 +110,4 @@
 
 (add-hook 'nrepl-connected-hook 'nrepl-proj-load)
 (global-auto-revert-mode t)
+(put 'erase-buffer 'disabled nil)
