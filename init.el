@@ -8,10 +8,20 @@
                     (or (buffer-file-name) load-file-name)))
 (add-to-list 'load-path dotfiles-dir)
 
-;; speedbar shows all files
+;; Add every subdirectory of ~/.emacs.d/site-lisp to the load path
+(dolist
+    (project (directory-files (concat dotfiles-dir "site-lisp") t "\\w+"))
+  (when (file-directory-p project)
+    (add-to-list 'load-path project)))
+
+;; speedbar config
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(speedbar-show-unknown-files t)
-)
+ '(speedbar-use-images nil))
 
 ;; ELPA
 (setq package-user-dir (concat dotfiles-dir "elpa"))
@@ -33,6 +43,7 @@
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key "\C-x\C-b" 'buffer-menu)
 (global-set-key (kbd "C-c C-f") 'rgrep)
+(global-set-key (kbd "<M-f11>") 'speedbar-get-focus)
 
 ;; C-c l/r to restore windows
 (winner-mode 1)
