@@ -26,6 +26,11 @@
 
 \(fn)" t nil)
 
+(autoload 'color-theme-sanityinc-tomorrow-slate "color-theme-sanityinc-tomorrow" "\
+
+
+\(fn)" t nil)
+
 (autoload 'color-theme-sanityinc-tomorrow-eighties "color-theme-sanityinc-tomorrow" "\
 
 

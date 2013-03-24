@@ -18,6 +18,8 @@
 ;;(require 'color-theme-sanityinc-solarized)
 ;;(color-theme-sanityinc-solarized-light)
 (color-theme-sanityinc-solarized-dark)
+;; a more greenish theme with good contrast
+;;(color-theme-sanityinc-tomorrow-slate)
 
 ;; Currently I'm using Tomorrow (starker contrast)
 ;;(require 'color-theme-sanityinc-tomorrow)
@@ -26,6 +28,8 @@
 
 ;; Font size
 (set-face-attribute 'default nil :height 110)
+;; nice big font for the weak sighted, try it with color-theme-sanityinc-tomorrow-slate
+;;(set-face-attribute 'default nil :height 130)
 
 ;; Scrolling
 (setq scroll-step 1)
@@ -34,6 +38,9 @@
 (setq display-time-24hr-format t)
 (setq display-time-load-average t)
 (display-time)
+
+;; show column number
+(column-number-mode t)
 
 ;; y/n hassle
 (fset 'yes-or-no-p 'y-or-n-p)

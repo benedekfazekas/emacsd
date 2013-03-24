@@ -105,7 +105,21 @@
                (green . "#b9ca4a")
                (aqua . "#70c0b1")
                (blue . "#7aa6da")
-               (purple . "#c397d8")))))
+               (purple . "#c397d8")))
+    (slate . ((background . "#294c4a")
+               (current-line . "#4f4f4f")
+               (selection . "grey7")
+               (foreground . "white")
+               (comment . "coral")
+               (red . "#d54e53")
+               (orange . "#e78c45")
+               (yellow . "#e7c547")
+               (green . "#b9ca4a")
+               (aqua . "#70c0b1")
+               (blue . "#7aa6da")
+               (purple . "tomato")))
+
+    ))
 
 
 
@@ -616,6 +630,11 @@ are bound."
 (defun color-theme-sanityinc-tomorrow-bright ()
   (interactive)
   (color-theme-sanityinc-tomorrow 'bright))
+
+;;;###autoload
+(defun color-theme-sanityinc-tomorrow-slate ()
+  (interactive)
+  (color-theme-sanityinc-tomorrow 'slate))
 
 ;;;###autoload
 (defun color-theme-sanityinc-tomorrow-eighties ()
