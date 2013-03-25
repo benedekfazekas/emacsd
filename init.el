@@ -44,7 +44,7 @@
          (cons 'height (/ (- (x-display-pixel-height) 10)
                              (frame-char-height)))))))
 
-(set-frame-size-according-to-resolution)
+;;(set-frame-size-according-to-resolution)
 
 ;; ELPA
 (setq package-user-dir (concat dotfiles-dir "elpa"))
