@@ -8,12 +8,6 @@
                     (or (buffer-file-name) load-file-name)))
 (add-to-list 'load-path dotfiles-dir)
 
-;; Add every subdirectory of ~/.emacs.d/site-lisp to the load path
-(dolist
-    (project (directory-files (concat dotfiles-dir "site-lisp") t "\\w+"))
-  (when (file-directory-p project)
-    (add-to-list 'load-path project)))
-
 ;; speedbar config
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
