@@ -62,6 +62,8 @@
 (global-set-key (kbd "C-c C-f") 'rgrep)
 (global-set-key (kbd "<M-f11>") 'speedbar-get-focus)
 
+(setq backup-inhibited 'anyvaluebutnil )
+
 ;; C-c l/r to restore windows
 (winner-mode 1)
 
