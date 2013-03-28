@@ -124,6 +124,12 @@
 ;; Dont like trailing whitespaces
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+(defun compile-clj-when-save ()
+  (if (string-match ".clj" (buffer-name)) (nrepl-load-current-buffer)))
+
+;; compile into repl when saved
+(add-hook 'after-save-hook 'compile-clj-when-save)
+
 (dolist (file '("jp-autocomplete.el"
 		"jp-ace-jump-mode.el"
 ;;		"jp-erc.el"
