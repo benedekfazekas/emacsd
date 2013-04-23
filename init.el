@@ -140,15 +140,5 @@
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
 
-(defun nrepl-proj-load ()
-  (buffer-file-name)
-  (interactive)
-  (set-buffer "*nrepl*")
-  (goto-char (point-max))
-  (nrepl-load-file "repl/fe/repl.clj")
-  (insert "(in-ns 'fe.repl)")
-  (nrepl-return))
-
-(add-hook 'nrepl-connected-hook 'nrepl-proj-load)
 (global-auto-revert-mode t)
 (put 'erase-buffer 'disabled nil)
