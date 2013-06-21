@@ -61,6 +61,10 @@
 (global-set-key "\C-x\C-b" 'buffer-menu)
 (global-set-key (kbd "C-c C-f") 'rgrep)
 (global-set-key (kbd "<M-f11>") 'speedbar-get-focus)
+;; current line ready for paste
+(global-set-key "\C-c\C-w" "\C-a\C- \C-n\M-w")
+;; duplicate current line
+(global-set-key "\C-c\C-d" "\C-a\C- \C-n\M-w\C-y")
 
 (setq backup-inhibited 'anyvaluebutnil )
 
