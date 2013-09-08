@@ -2,6 +2,7 @@
 
 (setq nrepl-popup-stacktraces nil)
 (setq nrepl-popup-stacktraces-in-repl t)
+(setq nrepl-popup-on-error nil)
 
 ;; eldoc
 (add-hook 'nrepl-interaction-mode-hook
@@ -46,12 +47,12 @@ ready to call."
   (insert "(uberrepl-reset)")
   (nrepl-return))
 
+;; runs (uberrepl-reset): stops apps, refreshes changed code, restarts apps
 (global-set-key (kbd "C-c r") 'uberrepl-reset)
-(global-set-key (kbd "C-c n j") 'nrepl-jack-in)
-(global-set-key (kbd "C-c n c") 'nrepl-close)
+;; closes *all* REPLs
 (global-set-key (kbd "C-c n q") 'nrepl-quit)
-(global-set-key (kbd "C-c n d") 'nrepl-display-current-connection-info)
-(global-set-key (kbd "C-c n n") 'nrepl-rotate-connection)
 (global-set-key (kbd "C-c n p") 'nrepl-toggle-pretty-printing)
+;; jumps to the REPL belonging to the current file
 (global-set-key (kbd "C-c n s") 'nrepl-switch-to-repl-buffer)
+;; list the available functions in ido
 (global-set-key (kbd "C-c n f") 'nrepl-load-fn-into-repl-buffer)
