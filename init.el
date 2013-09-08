@@ -130,22 +130,12 @@
 ;; Dont like trailing whitespaces
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-(defun nrepl-load-buffer-to-repl (connection)
-  (nrepl-load-current-buffer)
-  (nrepl-switch-to-next-connection))
-
-(defun compile-clj-when-save ()
-  (if (string-match ".clj" (buffer-name))
-      (mapcar 'nrepl-load-buffer-to-repl nrepl-connection-list)))
-
-;; compile into repl when saved
-(add-hook 'after-save-hook 'compile-clj-when-save)
-
 (dolist (file '("jp-autocomplete.el"
 		"jp-ace-jump-mode.el"
 ;;		"jp-erc.el"
 		"jp-multiple-cursors.el"
 		"jp-html"
+		"jp-nrepl"
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
 
