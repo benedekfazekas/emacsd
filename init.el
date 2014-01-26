@@ -20,7 +20,9 @@
  '(speedbar-frame-plist (quote (minibuffer nil width 30 border-width 0 internal-border-width 0 unsplittable t default-toolbar-visible-p nil has-modeline-p nil menubar-visible-p nil default-gutter-visible-p nil)))
  '(speedbar-indentation-width 2)
  '(speedbar-show-unknown-files t)
- '(speedbar-use-images nil))
+ '(speedbar-use-images nil)
+ '(xkcd-cache-dir "~/xkcd/")
+ '(xkcd-cache-latest "~/xkcd/latest"))
 
 (defun set-frame-size-according-to-resolution ()
   (interactive)
@@ -57,8 +59,8 @@
   (exec-path-from-shell-initialize))
 
 ;; minimap
-(add-to-list 'load-path (concat dotfiles-dir "/minimap"))
-(require 'minimap)
+;;(add-to-list 'load-path (concat dotfiles-dir "/minimap"))
+;;(require 'minimap)
 
 ;; Key Bindings
 (global-set-key (kbd "<C-f11>") 'cider-jack-in)
@@ -238,3 +240,7 @@
  '(rainbow-delimiters-depth-8-face ((t (:foreground "Purple"))))
  '(rainbow-delimiters-depth-9-face ((t (:foreground "White"))))
  '(rainbow-delimiters-unmatched-face ((t (:foreground "Red")))))
+
+;; start the day nicely
+(require 'xkcd)
+(add-hook 'emacs-startup-hook 'xkcd-get-latest)
