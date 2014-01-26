@@ -1,4 +1,4 @@
-(menu-bar-mode -1)
+;;(menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
@@ -17,9 +17,9 @@
 ;; Solarized if you wish..
 ;;(require 'color-theme-sanityinc-solarized)
 ;;(color-theme-sanityinc-solarized-light)
-(color-theme-sanityinc-solarized-dark)
+;;(color-theme-sanityinc-solarized-dark)
 ;; a more greenish theme with good contrast
-;;(color-theme-sanityinc-tomorrow-slate)
+(color-theme-sanityinc-tomorrow-eighties)
 
 ;; Currently I'm using Tomorrow (starker contrast)
 ;;(require 'color-theme-sanityinc-tomorrow)
@@ -27,9 +27,9 @@
 ;;(color-theme-sanityinc-tomorrow-bright)
 
 ;; Font size
-(set-face-attribute 'default nil :height 110)
+;;(set-face-attribute 'default nil :height 110)
 ;; nice big font for the weak sighted, try it with color-theme-sanityinc-tomorrow-slate
-;;(set-face-attribute 'default nil :height 130)
+(set-face-attribute 'default nil :height 130)
 
 ;; Scrolling
 (setq scroll-step 1)
