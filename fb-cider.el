@@ -10,6 +10,9 @@
 ;; never ending history
 (setq cider-repl-wrap-history t)
 
+;; show port on remote repl
+(setq nrepl-buffer-name-show-port t)
+
 ;; looong history
 (setq cider-repl-history-size 3000)
 
