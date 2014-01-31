@@ -24,7 +24,7 @@
   (nrepl-return))
 
 ;; runs (uberrepl-reset): stops apps, refreshes changed code, restarts apps
-(global-set-key (kbd "C-c r") 'uberrepl-reset)
+;;(global-set-key (kbd "C-c r") 'uberrepl-reset)
 
 (global-set-key (kbd "C-c n c") 'nrepl-close)
 ;; closes *all* REPLs
