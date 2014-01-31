@@ -149,6 +149,7 @@
 		"jp-multiple-cursors.el"
 		"jp-html"
 		"fb-cider"
+		"fb-cljrefactor"
 ;;		"jp-nrepl"
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
