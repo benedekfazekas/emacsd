@@ -3,4 +3,4 @@
 	  (lambda ()
 	    (clj-refactor-mode 1)
 	    ;; insert keybinding setup here
-	    (cljr-add-keybindings-with-prefix "C-c r")))
+	    (cljr-add-keybindings-with-prefix "C-c")))
