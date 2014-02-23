@@ -242,6 +242,8 @@
  '(rainbow-delimiters-depth-9-face ((t (:foreground "White"))))
  '(rainbow-delimiters-unmatched-face ((t (:foreground "Red")))))
 
+(setq-default indent-tabs-mode nil)
+
 ;; start the day nicely
 (require 'xkcd)
 (add-hook 'emacs-startup-hook 'xkcd-get-latest)
