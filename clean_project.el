@@ -1,0 +1,7 @@
+(defun cleanup-project-clj-files ()
+  (interactive)
+  (dolist (filename (cljr--project-files))
+    (when (s-ends-with? "clj" filename)
+      (find-file filename)
+      (ignore-errors (cljr-remove-unused-requires))
+      (save-buffer))))
