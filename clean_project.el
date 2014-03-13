@@ -4,4 +4,5 @@
     (when (s-ends-with? "clj" filename)
       (find-file filename)
       (ignore-errors (cljr-remove-unused-requires))
-      (save-buffer))))
+      (save-buffer)
+      (kill-buffer))))
