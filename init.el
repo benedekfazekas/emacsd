@@ -73,6 +73,10 @@
 (global-set-key "\C-c\C-w" "\C-a\C- \C-n\M-w")
 ;; duplicate current line
 (global-set-key "\C-c\C-d" "\C-a\C- \C-n\M-w\C-y")
+(global-set-key (kbd "M-j")
+                (lambda ()
+                  (interactive)
+                  (join-line -1)))
 
 (setq backup-inhibited 'anyvaluebutnil )
 
