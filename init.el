@@ -151,6 +151,7 @@
 		"fb-cider"
 		"fb-cljrefactor"
 		"fb-org"
+                "clean_project"
 ;;		"jp-nrepl"
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
