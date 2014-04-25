@@ -29,3 +29,5 @@
 (global-set-key (kbd "C-c n c") 'nrepl-close)
 ;; closes *all* REPLs
 (global-set-key (kbd "C-c n q") 'cider-quit)
+
+(global-set-key (kbd "M-p") 'cider-eval-print-last-sexp)
