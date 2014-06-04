@@ -98,6 +98,8 @@
 ;; Minibuffer completion
 ;;(ido-mode)
 ;;(setq ido-enable-flex-matching t)
+;;(setq global-auto-complete-mode t)
+
 
 ;; Parenthesis
 (show-paren-mode)
@@ -147,7 +149,7 @@
 (setenv "CLJ_FE_ZK_ROOT" "clj-fe-ben")
 
 (dolist (file '(
-		;;"jp-autocomplete.el"
+                "fb-autocomplete.el"
 		"jp-ace-jump-mode.el"
 ;;		"jp-erc.el"
 		"jp-multiple-cursors.el"
