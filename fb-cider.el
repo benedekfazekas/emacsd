@@ -16,16 +16,6 @@
 ;; looong history
 (setq cider-repl-history-size 3000)
 
-(defun uberrepl-reset ()
-  (interactive)
-  (save-some-buffers)
-  (pop-to-buffer "*nrepl uberrepl*")
-  (insert "(uberrepl-reset)")
-  (nrepl-return))
-
-;; runs (uberrepl-reset): stops apps, refreshes changed code, restarts apps
-;;(global-set-key (kbd "C-c r") 'uberrepl-reset)
-
 (global-set-key (kbd "C-c n c") 'nrepl-close)
 ;; closes *all* REPLs
 (global-set-key (kbd "C-c n q") 'cider-quit)
