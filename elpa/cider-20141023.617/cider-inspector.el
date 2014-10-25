@@ -61,7 +61,7 @@
 (defun cider-inspect (expression)
   "Eval the string EXPRESSION and inspect the result."
   (interactive
-   (list (cider-read-from-minibuffer "Inspect value (evaluated): "
+   (list (cider-read-from-minibuffer "Inspect value: "
                                      (cider-sexp-at-point))))
   (cider-ensure-op-supported "inspect-start")
   (cider-inspect-sym expression (cider-current-ns)))
@@ -115,7 +115,7 @@
 
 (defun cider-irender-el* (el)
   (cond ((symbolp el) (insert (symbol-name el)))
-        ((stringp el) (insert el))
+        ((stringp el) (insert (propertize el 'font-lock-face 'font-lock-keyword-face)))
         ((and (consp el) (eq (car el) :newline))
          (newline))
         ((and (consp el) (eq (car el) :value))
@@ -125,9 +125,8 @@
 (defun cider-irender-value (value idx)
   (cider-propertize-region
       (list 'cider-value-idx idx
-            'mouse-face 'highlight
-            'face 'font-lock-keyword-face)
-    (cider-irender-el* value)))
+            'mouse-face 'highlight)
+    (cider-irender-el* (cider-font-lock-as-clojure value))))
 
 
 ;; ===================================================

@@ -206,7 +206,7 @@ and line wrap."
           (when (search-forward-regexp "```\n" nil t)
             (replace-match "")
             (cider-font-lock-region-as mode beg (point))
-            (overlay-put (make-overlay beg (point)) 'face bg)
+            (overlay-put (make-overlay beg (point)) 'font-lock-face bg)
             (put-text-property beg (point) 'block 'code)))))))
 
 (defun cider-docview-fontify-literals (buffer)
@@ -222,7 +222,7 @@ Preformatted code text blocks are ignored."
             (let ((beg (point)))
               (when (search-forward "`" (line-end-position) t)
                 (replace-match "")
-                (put-text-property beg (point) 'face 'cider-docview-literal-face)))))))))
+                (put-text-property beg (point) 'font-lock-face 'cider-docview-literal-face)))))))))
 
 (defun cider-docview-fontify-emphasis (buffer)
   "Font lock BUFFER emphasized text and remove markdown characters.
@@ -241,7 +241,7 @@ Preformatted code text blocks are ignored."
                           'cider-docview-emphasis-face)))
               (when (search-forward-regexp "\\(\\w\\)\\*+" (line-end-position) t)
                 (replace-match "\\1")
-                (put-text-property beg (point) 'face face)))))))))
+                (put-text-property beg (point) 'font-lock-face face)))))))))
 
 (defun cider-docview-format-tables (buffer)
   "Align BUFFER tables and dim borders.
@@ -255,7 +255,7 @@ Tables are marked to be ignored by line wrap."
            (org-table-align)
            (goto-char (org-table-begin))
            (while (search-forward-regexp "[+|-]" (org-table-end) t)
-             (put-text-property (match-beginning 0) (match-end 0) 'face border))
+             (put-text-property (match-beginning 0) (match-end 0) 'font-lock-face border))
            (put-text-property (org-table-begin) (org-table-end) 'block 'table)))))))
 
 (defun cider-docview-wrap-text (buffer)
@@ -285,21 +285,21 @@ Tables are marked to be ignored by line wrap."
 
 (defun cider-docview-render-info (buffer info)
   "Emit into BUFFER formatted INFO for the Clojure or Java symbol."
-  (let* ((ns      (cadr (assoc "ns" info)))
-         (name    (cadr (assoc "name" info)))
-         (added   (cadr (assoc "added" info)))
-         (depr    (cadr (assoc "deprecated" info)))
-         (macro   (cadr (assoc "macro" info)))
-         (special (cadr (assoc "special-form" info)))
-         (forms   (cadr (assoc "forms-str" info)))
-         (args    (cadr (assoc "arglists-str" info)))
-         (doc     (cadr (assoc "doc" info)))
-         (url     (cadr (assoc "url" info)))
-         (class   (cadr (assoc "class" info)))
-         (member  (cadr (assoc "member" info)))
-         (javadoc (cadr (assoc "javadoc" info)))
-         (super   (cadr (assoc "super" info)))
-         (ifaces  (cadr (assoc "interfaces" info)))
+  (let* ((ns      (nrepl-dict-get info "ns"))
+         (name    (nrepl-dict-get info "name"))
+         (added   (nrepl-dict-get info "added"))
+         (depr    (nrepl-dict-get info "deprecated"))
+         (macro   (nrepl-dict-get info "macro"))
+         (special (nrepl-dict-get info "special-form"))
+         (forms   (nrepl-dict-get info "forms-str"))
+         (args    (nrepl-dict-get info "arglists-str"))
+         (doc     (nrepl-dict-get info "doc"))
+         (url     (nrepl-dict-get info "url"))
+         (class   (nrepl-dict-get info "class"))
+         (member  (nrepl-dict-get info "member"))
+         (javadoc (nrepl-dict-get info "javadoc"))
+         (super   (nrepl-dict-get info "super"))
+         (ifaces  (nrepl-dict-get info "interfaces"))
          (clj-name  (if ns (concat ns "/" name) name))
          (java-name (if member (concat class "/" member) class)))
     (with-current-buffer buffer
@@ -351,14 +351,15 @@ Tables are marked to be ignored by line wrap."
           (newline))
         (let ((beg (point-min))
               (end (point-max)))
-          (dolist (x info)
-            (put-text-property beg end (car x) (cadr x)))))
+          (nrepl-dict-map (lambda (k v)
+                            (put-text-property beg end k v))
+                          info)))
       (current-buffer))))
 
 (defun cider-docview-render (buffer symbol info)
   "Emit into BUFFER formatted documentation for SYMBOL's INFO."
   (with-current-buffer buffer
-    (let ((javadoc (cadr (assoc "javadoc" info)))
+    (let ((javadoc (nrepl-dict-get info "javadoc"))
           (inhibit-read-only t))
       (cider-docview-mode)
 
