@@ -105,7 +105,7 @@
 (show-paren-mode)
 
 ;; rainbows
-(global-rainbow-delimiters-mode)
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 ;; hl-sexp
 (require 'hl-sexp)
