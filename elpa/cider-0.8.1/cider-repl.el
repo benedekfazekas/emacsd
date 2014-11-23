@@ -174,10 +174,30 @@ PROJECT-DIR, PORT and HOST are as in `nrepl-make-buffer-name'."
       (cider-repl-reset-markers))
     buf))
 
+(defun cider-repl-require-repl-utils ()
+  "Require standard REPL util functions into the current REPL."
+  (interactive)
+  (cider-eval
+   "(when (clojure.core/resolve 'clojure.main/repl-requires)
+      (clojure.core/map clojure.core/require clojure.main/repl-requires))"
+   (lambda (response) nil)))
+
+(defun cider-repl-set-initial-ns (buffer)
+  "Set the REPL BUFFER's initial namespace (by altering `nrepl-buffer-ns').
+This is \"user\" by default but can be overridden in apps like lein (:init-ns)."
+  ;; we don't want to get a timeout during init
+  (let ((nrepl-sync-request-timeout nil))
+    (with-current-buffer buffer
+      (let ((initial-ns (read (nrepl-dict-get (nrepl-sync-request:eval "(str *ns*)") "value"))))
+        (when initial-ns
+          (setq nrepl-buffer-ns initial-ns))))))
+
 (defun cider-repl-init (buffer &optional no-banner)
   "Initialize the REPL in BUFFER.
 BUFFER must be a REPL buffer with `cider-repl-mode' and a running
 client process connection. Unless NO-BANNER is non-nil, insert a banner."
+  (cider-repl-set-initial-ns buffer)
+  (cider-repl-require-repl-utils)
   (unless no-banner
     (cider-repl--insert-banner-and-prompt buffer))
   (when cider-repl-display-in-current-window
@@ -983,7 +1003,8 @@ constructs."
     (define-key map (kbd "C-c M-f") 'cider-load-fn-into-repl-buffer)
     (define-key map (kbd "C-c C-q") 'cider-quit)
     (define-key map (kbd "C-c M-i") 'cider-inspect)
-    (define-key map (kbd "C-c M-t") 'cider-toggle-trace)
+    (define-key map (kbd "C-c M-t v") 'cider-toggle-trace-var)
+    (define-key map (kbd "C-c M-t n") 'cider-toggle-trace-ns)
     (define-key map (kbd "C-c C-x") 'cider-refresh)
     (define-key map (kbd "C-x C-e") 'cider-eval-last-sexp)
     (define-key map (kbd "C-c C-r") 'cider-eval-region)
@@ -998,16 +1019,24 @@ constructs."
         ["Jump to source" cider-jump-to-var]
         ["Jump to resource" cider-jump-to-resource]
         ["Jump back" cider-jump-back]
+        ["Switch to Clojure buffer" cider-switch-to-last-clojure-buffer]
         "--"
         ["Inspect" cider-inspect]
+        ["Macroexpand" cider-macroexpand-1]
+        ["Macroexpand all" cider-macroexpand-all]
+        ["Refresh loaded code" cider-refresh]
+        ["Toggle tracing" cider-toggle-trace]
         "--"
         ["Set REPL ns" cider-repl-set-ns]
         ["Toggle pretty printing" cider-repl-toggle-pretty-printing]
+        "--"
+        ["Next prompt" cider-repl-next-prompt]
+        ["Previous prompt" cider-repl-previous-prompt]
         ["Clear output" cider-repl-clear-output]
         ["Clear buffer" cider-repl-clear-buffer]
-        ["Refresh loaded code" cider-refresh]
         ["Kill input" cider-repl-kill-input]
         ["Interrupt" cider-interrupt]
+        "--"
         ["Quit" cider-quit]
         ["Restart" cider-restart]
         "--"

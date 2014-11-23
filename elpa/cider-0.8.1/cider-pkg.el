@@ -1,4 +1,4 @@
-(define-package "cider" "20141023.617" "Clojure Integrated Development Environment and REPL"
+(define-package "cider" "0.8.1" "Clojure Integrated Development Environment and REPL"
   '((clojure-mode "3.0.0")
     (cl-lib "0.5")
     (dash "2.4.1")

@@ -388,7 +388,7 @@ then returned."
             (lambda (k2 v2)
               (nrepl-dict-put dict1 k2
                               (nrepl--merge (nrepl-dict-get dict1 k2) v2
-                                           (member k2 '("id" "session")))))
+                                            (member k2 '("id" "session")))))
             dict2)
            dict1)
           ((and (listp dict2) (listp dict1)) (append dict1 dict2))
@@ -412,7 +412,7 @@ The STUB slot stores a stack of nested, incompletely parsed objects.")
   "Decode a bencode list or dict starting at point.
 STACK is as in `nrepl--bdecode-1'."
   ;; skip leading l or d
-  (forward-char 1) 
+  (forward-char 1)
   (let* ((istack (nrepl--bdecode-1 stack))
          (pos0 (point))
          (info (car istack)))
@@ -562,8 +562,8 @@ specification.  Everything else is encoded as string."
     (when (eq ?e (aref string (1- (length string))))
       (let ((response-q (process-get proc :response-q)))
         (nrepl-bdecode string-q response-q)
-        (with-current-buffer (process-buffer proc)
-          (while (queue-head response-q)
+        (while (queue-head response-q)
+          (with-current-buffer (process-buffer proc)
             (nrepl--dispatch-response (queue-dequeue response-q))))))))
 
 (defun nrepl--dispatch-response (response)
@@ -709,7 +709,7 @@ the newly created client connection process."
 
     (process-put client-proc :string-q (queue-create))
     (process-put client-proc :response-q (nrepl-response-queue))
-    
+
     (with-current-buffer client-buf
       (-when-let (server-buf (and server-proc (process-buffer server-proc)))
         (setq nrepl-project-dir (buffer-local-value 'nrepl-project-dir server-buf)
@@ -723,7 +723,7 @@ the newly created client connection process."
                                   (process-buffer tunnel))
             nrepl-pending-requests (make-hash-table :test 'equal)
             nrepl-completed-requests (make-hash-table :test 'equal)))
-    
+
     (nrepl-make-connection-default client-buf)
     (nrepl--init-client-sessions client-proc)
     (nrepl--init-connection-buffer client-buf replp)
@@ -768,9 +768,15 @@ and store that information as buffer-local data in the connection buffer."
     (when replp
       (cider-repl-init conn-buffer))))
 
+(defun nrepl-close-client-sessions ()
+  "Close the nREPL sessions for the active connection."
+  (nrepl-sync-request:close (nrepl-current-session))
+  (nrepl-sync-request:close (nrepl-current-tooling-session)))
+
 (defun nrepl-close (connection-buffer)
-  "Close the nrepl connection for CONNECTION-BUFFER."
+  "Close the nREPL connection for CONNECTION-BUFFER."
   (interactive (list (nrepl-current-connection-buffer)))
+  (nrepl-close-client-sessions)
   (nrepl--close-connection-buffer connection-buffer)
   (run-hooks 'nrepl-disconnected-hook)
   (nrepl--connections-refresh))
@@ -890,7 +896,7 @@ REQUEST is a pair list of the form (\"op\" \"operation\" \"par1-name\"
       (process-send-string nil message))))
 
 (defun nrepl-send-sync-request (request)
-  "Send REQUEST to the nREPL server synchronously (discouraged).
+  "Send REQUEST to the nREPL server synchronously.
 Hold till final \"done\" message has arrived and join all response messages
 of the same \"op\" that came along."
   (let* ((time0 (current-time))
@@ -899,8 +905,9 @@ of the same \"op\" that came along."
     (while (not (member "done" (nrepl-dict-get response "status")))
       (accept-process-output nil 0.01)
       ;; break out in case we don't receive a response for a while
-      (when (> (cadr (time-subtract (current-time) time0))
-               nrepl-sync-request-timeout)
+      (when (and nrepl-sync-request-timeout
+                 (> (cadr (time-subtract (current-time) time0))
+                    nrepl-sync-request-timeout))
         (error "Sync nREPL request timed out %s" request)))
     (-when-let* ((ex (nrepl-dict-get response "ex"))
                  (err (nrepl-dict-get response "err")))
@@ -945,15 +952,29 @@ If NS is non-nil, include it in the request. SESSION defaults to current session
   "Sent a :clone request to create a new client session."
   (nrepl-send-sync-request '("op" "clone")))
 
-(defun nrepl-sync-request:describe ()
+(defun nrepl-sync-request:close (session)
+  "Sent a :close request to close SESSION."
+  (nrepl-send-sync-request (list "op" "close" "session" session)))
+
+(defun nrepl-sync-request:describe (&optional session)
   "Perform :describe request."
-  (nrepl-send-sync-request (list "op" "describe")))
+  (if session
+      (nrepl-send-sync-request (list "session" session "op" "describe"))
+    (nrepl-send-sync-request '("op" "describe"))))
+
+(defun nrepl-sync-request:ls-sessions ()
+  "Perform :ls-sessions request."
+  (nrepl-send-sync-request '("op" "ls-sessions")))
 
 (defun nrepl-sync-request:eval (input &optional ns session)
   "Send the INPUT to the nREPL server synchronously.
 If NS is non-nil, include it in the request. SESSION defaults to current
 session."
   (nrepl-send-sync-request (nrepl--eval-request input ns session)))
+
+(defun nrepl-sessions ()
+  "Get a list of active sessions for the current nREPL connections."
+  (nrepl-dict-get (nrepl-sync-request:ls-sessions) "sessions"))
 
 
 ;;; Server
@@ -1106,7 +1127,7 @@ The default buffer name is *nrepl-messages*."
         (with-current-buffer buffer
           (buffer-disable-undo)
           (nrepl-messages-mode)
-        buffer))))
+          buffer))))
 
 
 ;;; Connection Buffer Management
