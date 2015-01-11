@@ -19,6 +19,8 @@
 ;; error buffer not popping up
 (setq cider-show-error-buffer nil)
 
+;; pretty priting
+(setq cider-repl-toggle-pretty-printing t)
 
 
 (global-set-key (kbd "C-c n c") 'nrepl-close)
