@@ -67,7 +67,7 @@
 (global-set-key (kbd "<f11>") 'ns-toggle-fullscreen)
 (global-set-key (kbd "C-x g") 'magit-status)
 (global-set-key "\C-x\C-b" 'buffer-menu)
-(global-set-key (kbd "M-f") 'rgrep)
+(global-set-key (kbd "ESC M-f") 'rgrep)
 (global-set-key (kbd "<M-f11>") 'speedbar-get-focus)
 ;; current line ready for paste
 (global-set-key "\C-c\C-w" "\C-a\C- \C-n\M-w")
