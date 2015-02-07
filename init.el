@@ -27,20 +27,20 @@
 (defun set-frame-size-according-to-resolution ()
   (interactive)
   (if window-system
-  (progn
-    ;; use 120 char wide window for largeish displays
-    ;; and smaller 80 column windows for smaller displays
-    ;; pick whatever numbers make sense for you
-    (if (> (x-display-pixel-width) 1280)
-           (add-to-list 'default-frame-alist (cons 'width 121))
-           (add-to-list 'default-frame-alist (cons 'width 81)))
-    ;; for the height, subtract a couple hundred pixels
-    ;; from the screen height (for panels, menubars and
-    ;; whatnot), then divide by the height of a char to
-    ;; get the height we want
-    (add-to-list 'default-frame-alist
-         (cons 'height (/ (- (x-display-pixel-height) 10)
-                             (frame-char-height)))))))
+      (progn
+        ;; use 120 char wide window for largeish displays
+        ;; and smaller 80 column windows for smaller displays
+        ;; pick whatever numbers make sense for you
+        (if (> (x-display-pixel-width) 1280)
+            (add-to-list 'default-frame-alist (cons 'width 121))
+          (add-to-list 'default-frame-alist (cons 'width 81)))
+        ;; for the height, subtract a couple hundred pixels
+        ;; from the screen height (for panels, menubars and
+        ;; whatnot), then divide by the height of a char to
+        ;; get the height we want
+        (add-to-list 'default-frame-alist
+                     (cons 'height (/ (- (x-display-pixel-height) 10)
+                                      (frame-char-height)))))))
 
 ;;(set-frame-size-according-to-resolution)
 
@@ -151,14 +151,14 @@
 (dolist (file '(
                 "fb-autocomplete.el"
 		"jp-ace-jump-mode.el"
-;;		"jp-erc.el"
+                ;;		"jp-erc.el"
 		"jp-multiple-cursors.el"
 		"jp-html"
 		"fb-cider"
 		"fb-cljrefactor"
 		"fb-org"
                 "clean_project"
-;;		"jp-nrepl"
+                ;;		"jp-nrepl"
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
 
@@ -168,69 +168,96 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
+;; pretty symbols
+(global-prettify-symbols-mode +1)
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (push '(">=" .      ?≥) prettify-symbols-alist)
+            (push '("<=" .      ?≤) prettify-symbols-alist)
+            (push '("partial" . ?π) prettify-symbols-alist)
+            (push '("defn" .    ?⇒) prettify-symbols-alist)
+            (push '("defn-" .   ?⇛) prettify-symbols-alist)
+            (push '("atom" .    ?α) prettify-symbols-alist)
+            (push '("nil" .     ?Ø) prettify-symbols-alist)
+            (push '("->" .      ?→) prettify-symbols-alist)
+            (push '("->>" .     ?⇉) prettify-symbols-alist)
+            (push '("reduce"    ?Σ) prettify-symbols-alist)
+            (push '("map"       ?↦) prettify-symbols-alist)))
+
+;; reformat buffer on save without prettify symbols
+(defun indent-sans-prettification ()
+  (when (derived-mode-p 'clojure-mode)
+    (global-prettify-symbols-mode -1)
+    (save-excursion
+      (indent-region (point-min) (point-max) nil)
+      (save-buffer))
+    (global-prettify-symbols-mode +1)))
+
+(add-hook 'after-save-hook 'indent-sans-prettification)
+
 ;;http://blog.jayfields.com/2013/05/emacs-lisp-font-lock-for-clojures.html?utm_source=dlvr.it&utm_medium=twitter
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("(\\(partial\\)[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "π")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("(\\(partial\\)[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "π")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(true\\)"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "τ")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(true\\)"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "τ")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(false\\)"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "ғ")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(false\\)"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "ғ")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(defn\\)[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "⇒")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(defn\\)[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "⇒")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(defn-\\)[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "⇛")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(defn-\\)[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "⇛")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(def\\)[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "ℵ")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(def\\)[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "ℵ")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(atom\\)[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "α")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(atom\\)[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "α")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("\\(nil\\)"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "Ø")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("\\(nil\\)"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "Ø")
+;;                                nil))))))
 
-(eval-after-load 'clojure-mode
-  '(font-lock-add-keywords
-    'clojure-mode `(("(\\(fn\\)[\[[:space:]]"
-                     (0 (progn (compose-region (match-beginning 1)
-                                               (match-end 1) "λ")
-                               nil))))))
+;; (eval-after-load 'clojure-mode
+;;   '(font-lock-add-keywords
+;;     'clojure-mode `(("(\\(fn\\)[\[[:space:]]"
+;;                      (0 (progn (compose-region (match-beginning 1)
+;;                                                (match-end 1) "λ")
+;;                                nil))))))
 
 ;;(set-variable 'magit-emacsclient-executable "/usr/bin/emacsclient")
 
