@@ -169,7 +169,7 @@
 (setq uniquify-buffer-name-style 'forward)
 
 ;; pretty symbols
-(global-prettify-symbols-mode +1)
+;;(global-prettify-symbols-mode +1)
 (add-hook 'clojure-mode-hook
           (lambda ()
             (push '(">=" .      ?≥) prettify-symbols-alist)
@@ -186,6 +186,7 @@
 
 ;; reformat buffer on save without prettify symbols
 (defun indent-sans-prettification ()
+  (interactive)
   (when (derived-mode-p 'clojure-mode)
     (global-prettify-symbols-mode -1)
     (save-excursion
@@ -193,7 +194,7 @@
       (save-buffer))
     (global-prettify-symbols-mode +1)))
 
-(add-hook 'after-save-hook 'indent-sans-prettification)
+;;(add-hook 'after-save-hook 'indent-sans-prettification)
 
 ;;http://blog.jayfields.com/2013/05/emacs-lisp-font-lock-for-clojures.html?utm_source=dlvr.it&utm_medium=twitter
 ;; (eval-after-load 'clojure-mode
