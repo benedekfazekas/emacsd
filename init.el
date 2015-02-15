@@ -158,7 +158,7 @@
 		"fb-cider"
 		"fb-cljrefactor"
 		"fb-org"
-                "clean_project"
+                "fb-ruby"
                 ;;		"jp-nrepl"
 		"jp-lnf.el"))
   (load (concat dotfiles-dir file)))
@@ -223,6 +223,8 @@
  '(rainbow-delimiters-unmatched-face ((t (:foreground "Red")))))
 
 (setq-default indent-tabs-mode nil)
+
+(setq split-width-threshold 120)
 
 ;; start the day nicely
 (require 'xkcd)
