@@ -3,7 +3,7 @@
 
 ;;yasnippet
 (add-hook 'ruby-mode-hook 'yas-minor-mode)
-(add-hook 'ruby-mode-hook 'yas-reload-all)
+(yas-reload-all)
 
 ;; company
 (add-hook 'ruby-mode-hook 'company-mode)
