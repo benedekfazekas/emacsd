@@ -170,7 +170,7 @@
 (setq uniquify-buffer-name-style 'forward)
 
 ;; pretty symbols
-(global-prettify-symbols-mode +1)
+(global-prettify-symbols-mode -1)
 
 (add-hook 'clojure-mode-hook
           (lambda ()
