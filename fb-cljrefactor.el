@@ -13,7 +13,4 @@
 ;; no auto sort, thx
 (setq cljr-auto-sort-ns nil)
 
-;; always ask for dir when find usages/rename symbols
-(setq cljr-find-symbols-in-dir-prompt t)
-
-(add-hook 'nrepl-connected-hook #'cljr-warm-ast-cache)
+(setq cljr-favor-prefix-notation nil)

@@ -3,7 +3,7 @@
 ;;; Code:
 (add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
 
-;;;### (autoloads nil "clj-refactor" "clj-refactor.el" (21756 31430
+;;;### (autoloads nil "clj-refactor" "clj-refactor.el" (21829 64551
 ;;;;;;  0 0))
 ;;; Generated autoloads from clj-refactor.el
 

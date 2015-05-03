@@ -22,6 +22,8 @@
 ;; pretty priting
 (setq cider-repl-toggle-pretty-printing t)
 
+;; debug nrepl msgs
+;;(setq nrepl-log-messages t)
 
 (global-set-key (kbd "C-c n c") 'nrepl-close)
 ;; closes *all* REPLs
