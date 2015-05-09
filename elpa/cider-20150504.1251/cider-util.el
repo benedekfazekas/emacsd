@@ -1,7 +1,7 @@
 ;;; cider-util.el --- Common utility functions that don't belong anywhere else -*- lexical-binding: t -*-
 
-;; Copyright © 2012-2014 Tim King, Phil Hagelberg
-;; Copyright © 2013-2014 Bozhidar Batsov, Hugo Duncan, Steve Purcell
+;; Copyright © 2012-2015 Tim King, Phil Hagelberg
+;; Copyright © 2013-2015 Bozhidar Batsov, Hugo Duncan, Steve Purcell
 ;;
 ;; Author: Tim King <kingtim@gmail.com>
 ;;         Phil Hagelberg <technomancy@gmail.com>
@@ -73,7 +73,7 @@ buffer-local wherever it is set."
 
 (defun cider-intern-keys (props)
   "Copy plist-style PROPS with any non-symbol keys replaced with symbols."
-  (-map-indexed (lambda (i x) (if (oddp i) x (cider-maybe-intern x))) props))
+  (-map-indexed (lambda (i x) (if (cl-oddp i) x (cider-maybe-intern x))) props))
 
 (defmacro cider-propertize-region (props &rest body)
   "Execute BODY and add PROPS to all the text it inserts.
@@ -134,22 +134,13 @@ Unless you specify a BUFFER it will default to the current one."
          (scaled-rgb (mapcar (lambda (n)
                                (format "%04x" (round (+ n (* scale 65535)))))
                              rgb)))
-    (apply 'concat "#" scaled-rgb)))
+    (apply #'concat "#" scaled-rgb)))
 
 (defun cider-scale-background-color ()
   "Scale the current background color to get a slighted muted version."
   (let ((color (frame-parameter nil 'background-color))
         (dark (eq (frame-parameter nil 'background-mode) 'dark)))
     (cider-scale-color color (if dark 0.05 -0.05))))
-
-(defun cider-format-pprint-eval (form &optional right-margin)
-  "Return a string of Clojure code that will eval and pretty-print FORM.
-Pretty printing will avoid going beyond column RIGHT-MARGIN which defaults
-to `fill-column'."
-  (format "(clojure.core/let [x %s]
-             (binding [clojure.pprint/*print-right-margin* %d]
-               (clojure.pprint/pprint x)) x)"
-          form (or right-margin fill-column)))
 
 (autoload 'pkg-info-version-info "pkg-info.el")
 
@@ -163,18 +154,22 @@ to `fill-column'."
 
 (defun cider-string-join (strings &optional separator)
   "Join all STRINGS using SEPARATOR."
-  (mapconcat 'identity strings separator))
+  (mapconcat #'identity strings separator))
 
 (defun cider-join-into-alist (candidates &optional separator)
   "Make an alist from CANDIDATES.
 The keys are the elements joined with SEPARATOR and values are the original
-elements. Useful for `completing-read' when candidates are complex
+elements.  Useful for `completing-read' when candidates are complex
 objects."
   (mapcar (lambda (el)
             (if (listp el)
                 (cons (cider-string-join el (or separator ":")) el)
               (cons el el)))
           candidates))
+
+(defun cider-namespace-qualified-p (sym)
+  "Return t if SYM is namespace-qualified."
+  (string-match-p "[^/]+/" sym))
 
 (provide 'cider-util)
 
