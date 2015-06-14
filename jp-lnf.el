@@ -35,9 +35,9 @@
 (setq scroll-step 1)
 
 ;; show time
-(setq display-time-24hr-format t)
-(setq display-time-load-average t)
-(display-time)
+;;(setq display-time-24hr-format t)
+;;(setq display-time-load-average t)
+;;(display-time)
 
 ;; show column number
 (column-number-mode t)

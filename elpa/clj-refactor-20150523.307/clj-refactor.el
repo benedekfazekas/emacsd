@@ -5,7 +5,7 @@
 ;; Author: Magnar Sveen <magnars@gmail.com>
 ;; Version: 1.0.5
 ;; Keywords: convenience
-;; Package-Requires: ((emacs "24.3") (s "1.8.0") (dash "2.4.0") (yasnippet "0.6.1") (paredit "24") (multiple-cursors "1.2.2") (cider "0.8.1"))
+;; Package-Requires: ((emacs "24.3") (s "1.8.0") (dash "2.4.0") (yasnippet "0.6.1") (paredit "24") (multiple-cursors "1.2.2") (cider "0.8.1") (edn "1.1.1"))
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -33,6 +33,7 @@
 (require 'multiple-cursors-core)
 (require 'clojure-mode)
 (require 'cider)
+(require 'edn)
 
 (defvar cljr-version "1.1.0-SNAPSHOT"
   "The current version of clojure-refactor")
@@ -208,6 +209,7 @@ with the middleware."
     ("am" . (cljr-add-missing-libspec "Add missing libspec"))
     ("ap" . (cljr-add-project-dependency "Add project dependency"))
     ("ar" . (cljr-add-require-to-ns "Add require to ns"))
+    ("as" . (cljr-add-stubs "Add stubs for the interface / protocol at point."))
     ("au" . (cljr-add-use-to-ns "Add use to ns"))
     ("cc" . (cljr-cycle-coll "Cycle coll"))
     ("ci" . (cljr-cycle-if "Cycle if"))
@@ -222,6 +224,7 @@ with the middleware."
     ("fu" . (cljr-find-usages "Find usages"))
     ("hd" . (cljr-hotload-dependency "Hotload dependency"))
     ("il" . (cljr-introduce-let "Introduce let"))
+    ("iv" . (cljr-inline-symbol "Inline symbol"))
     ("mf" . (cljr-move-form "Move form"))
     ("ml" . (cljr-move-to-let "Move to let"))
     ("pc" . (cljr-project-clean "Project clean"))
@@ -361,6 +364,7 @@ errors."
   (looking-at "\\[[^[[:space:]]+[[:space:]]+\""))
 
 (defun cljr--just-one-blank-line ()
+  "Ensure there's only one blank line at POINT."
   (newline 2)
   (forward-line -1)
   (delete-blank-lines))
@@ -393,6 +397,46 @@ list of (fn args) to pass to `apply''"
     (when (fboundp 'markdown-mode)
       (markdown-mode))
     (view-mode 1)))
+
+(defun cljr--goto-toplevel-forward ()
+  "Move forward and up until we reach toplevel."
+  (paredit-forward-up (cljr--depth-at-point)))
+
+(defun cljr--indent-defun ()
+  "Indent the toplevel form containing point"
+  (indent-region (cljr--point-after 'cljr--goto-toplevel)
+                 (cljr--point-after 'cljr--goto-toplevel-forward)))
+
+(defun cljr--point-at-text-matching
+    (regexp direction &optional bound noerror count)
+  "Return the point after searching in DIRECTION for TEXT.
+
+DIRECTION is either :forward or :backward.
+
+the optional arguments are passed on the to search function.  See
+e.g. `re-search-forward'"
+  (save-excursion
+    (cond
+     ;; NOTE: non-optional direction is intentional because I think it
+     ;; improves readability greatly at the call site
+     ((eq direction :forward)
+      (re-search-forward regexp bound noerror count))
+     ((eq direction :backward)
+      (re-search-backward regexp bound noerror count))
+     (t (error "Only know how to search :forward or :backward, you asked for '%s'"
+               direction)))))
+
+(defun cljr--goto-fn-definition ()
+  (let* ((search-bound (cljr--point-after 'cljr--goto-toplevel))
+         (literal (cljr--point-at-text-matching "#(" :backward search-bound
+                                                :noerror))
+         (fn (cljr--point-at-text-matching "(fn \\[" :backward search-bound
+                                           :noerror)))
+    (if (or literal fn)
+        (progn (goto-char (max (or literal (point-min)) (or fn (point-min))))
+               (when (looking-back "#")
+                 (backward-char)))
+      (error "Can't find definition of anonymous function!"))))
 
 ;; ------ reify protocol defrecord -----------
 
@@ -445,9 +489,10 @@ list of (fn args) to pass to `apply''"
 
 (defun cljr--project-files ()
   (split-string (shell-command-to-string
-                 (format "find %s -type f \\( %s \\) %s | head -n %s"
+                 (format "find %s -type f \\( %s -or %s \\) %s | head -n %s"
                          (cljr--project-dir)
                          (format "-name \"%s\"" "*.clj")
+                         (format "-name \"%s\"" "*.cljc")
                          "-not -regex \".*svn.*\""
                          1000))))
 
@@ -537,12 +582,20 @@ word test in it and whether the file lives under the test/ directory."
   (or (string-match-p "test\." (clojure-find-ns))
       (string-match-p "/test" (buffer-file-name))))
 
+(defun cljr--clojure-ish-filename-p (file-name)
+  (or (s-ends-with? ".clj" file-name)
+      (s-ends-with? ".cljs" file-name)
+      (s-ends-with? ".cljx" file-name)
+      (s-ends-with? ".cljc" file-name)))
+
+(defun cljr--clojure-filename-p (file-name)
+  (or (s-ends-with? ".clj" (buffer-file-name))
+      (s-ends-with? ".cljc" (buffer-file-name))))
+
 (defun cljr--add-ns-if-blank-clj-file ()
   (ignore-errors
     (when (and cljr-add-ns-to-blank-clj-files
-               (or (s-ends-with? ".clj" (buffer-file-name))
-                   (s-ends-with? ".cljs" (buffer-file-name))
-                   (s-ends-with? ".cljx" (buffer-file-name)))
+               (cljr--clojure-ish-filename-p (buffer-file-name))
                (= (point-min) (point-max)))
       (clojure-insert-ns-form)
       (newline 2)
@@ -556,7 +609,7 @@ word test in it and whether the file lives under the test/ directory."
     (when (and
            file-name
            (not (file-exists-p file-name)) ;; only new files
-           (s-matches? "-[^/]+\.clj$" file-name)
+           (s-matches? "-[^/]+\.clj[sxc]?$" file-name)
            (yes-or-no-p "The file name contains dashes. Replace with underscores?"))
       (let ((new-name (concat
                        (file-name-directory file-name)
@@ -1433,6 +1486,9 @@ let are."
     (cljr--depth-at-point)))
 
 (defun cljr--eliminate-let ()
+  "Remove a the nearest let form.
+
+This function only does the actual removal."
   (cljr--goto-let)
   (paredit-forward-down)
   (paredit-forward 2)
@@ -1681,7 +1737,7 @@ sorts the project's dependency vectors."
   (when (or (not cljr-project-clean-prompt)
             (yes-or-no-p "Cleaning your project might change many of your clj files. Do you want to proceed?"))
     (dolist (filename (cljr--project-files))
-      (when (and (s-ends-with? "clj" filename)
+      (when (and (cljr--clojure-filename-p filename)
                  (not (cljr--excluded-from-project-clean? filename)))
         (cljr--update-file filename
           (ignore-errors (-map 'funcall cljr-project-clean-functions)))))
@@ -1857,6 +1913,13 @@ If it's present KEY indicates the key to extract from the response."
   (unless (nrepl-op-supported-p "find-symbol")
     (error "nrepl-refactor middleware not available! Did you remember to install it?")))
 
+(defun cljr--ensure-op-supported (op)
+  "Check for support of middleware op OP.
+Signal an error if it is not supported."
+  (cljr--assert-middleware)
+  (unless (nrepl-op-supported-p op)
+    (error "Can't find nREPL middleware providing op \"%s\".  Please, install (or update) refactor-nrepl %s and restart CIDER" op (upcase cljr-version))))
+
 (defun cljr--assert-leiningen-project ()
   (unless (string= (file-name-nondirectory (or (cljr--project-file) ""))
                    "project.clj")
@@ -1872,16 +1935,6 @@ If it's present KEY indicates the key to extract from the response."
                (version (->> (cljr--get-versions-from-middleware lib-name)
                              (cljr--prompt-user-for "Version: "))))
     (cljr--add-project-dependency lib-name version)))
-
-(defun cljr--goto-fn-definition ()
-  (if (or
-       (re-search-backward "#("
-                           (save-excursion (cljr--goto-toplevel) (point)) t)
-       (re-search-backward "(fn \\["
-                           (save-excursion (cljr--goto-toplevel) (point)) t))
-      (when (looking-back "#")
-        (backward-char))
-    (error "Can't find definition of anonymous function!")))
 
 (defun cljr--promote-fn ()
   (save-excursion
@@ -2048,51 +2101,55 @@ root."
     (cljr--setup-find-symbol-buffer (or symbol-name symbol))
     (cljr--find-symbol (or symbol-name symbol) ns 'cljr--format-and-insert-symbol-occurrence)))
 
-(defun cljr--rename-occurrences (ns occurrences new-name)
+(defun cljr--rename-occurrence (ns file line-beg line-end col-beg col-end name new-name)
   (save-excursion
-    (dolist (symbol-meta occurrences)
-      (with-current-buffer
-          (find-file-noselect (plist-get symbol-meta :file))
-        (goto-char (point-min))
-        (let* ((line-beg (plist-get symbol-meta :line-beg))
-               (line-e (or (plist-get symbol-meta :line-end) line-beg))
-               (line-end line-beg)
-               (col-beg (1- (or (plist-get symbol-meta :col-beg) 1)))
-               (start (progn (forward-line (1- line-beg))
-                             (move-to-column col-beg)
-                             (point)))
-               (col-end (if (= line-beg line-e)
-                            (line-end-position)
-                          (or (plist-get symbol-meta :col-end) (line-end-position))))
-               (end (progn (goto-char (point-min))
-                           (forward-line (1- line-e))
-                           (move-to-column col-end)
+    (with-current-buffer
+        (find-file-noselect file)
+      (goto-char (point-min))
+      (let* ((line-end (or line-end line-beg))
+             (col-beg (1- (or col-beg 1)))
+             (start (progn (forward-line (1- line-beg))
+                           (move-to-column col-beg)
                            (point)))
-               (name (->> :name
-                          (plist-get symbol-meta)
-                          cljr--symbol-suffix
-                          regexp-quote))
-               (matches-count 0)
-               (replaced nil))
-          (goto-char start)
-          (while (re-search-forward name end t)
-            (setq matches-count (1+ matches-count)))
-          (goto-char start)
-          (if (and (= 1 matches-count) (re-search-forward name end t))
-              (replace-match new-name)
-            (while (and (not replaced) (re-search-forward name end t))
-              (let* ((original-point (point))
-                     (cider-symbol (cider-symbol-at-point))
-                     (var-info (cider-var-info cider-symbol))
-                     (symbol-ns (nrepl-dict-get var-info "ns"))
-                     (symbol-name (nrepl-dict-get var-info "name"))
-                     (word-start (progn (forward-word -1)
-                                        (point))))
-                (when (and (string= symbol-ns ns) (string= symbol-name name))
-                  (perform-replace name new-name nil nil nil nil nil word-start original-point)
-                  (setq replaced t))
-                (goto-char original-point)))))
-        (save-buffer)))))
+             (col-end (if (= line-beg line-end)
+                          (line-end-position)
+                        (or col-end (line-end-position))))
+             (end (progn (goto-char (point-min))
+                         (forward-line (1- line-end))
+                         (move-to-column col-end)
+                         (point)))
+             (name (->> name cljr--symbol-suffix regexp-quote))
+             (matches-count 0)
+             (replaced nil))
+        (goto-char start)
+        (while (re-search-forward name end t)
+          (setq matches-count (1+ matches-count)))
+        (goto-char start)
+        (if (and (= 1 matches-count) (re-search-forward name end t))
+            (replace-match new-name)
+          (while (and (not replaced) (re-search-forward name end t))
+            (let* ((original-point (point))
+                   (cider-symbol (cider-symbol-at-point))
+                   (var-info (cider-var-info cider-symbol))
+                   (symbol-ns (nrepl-dict-get var-info "ns"))
+                   (symbol-name (nrepl-dict-get var-info "name"))
+                   (word-start (progn (forward-word -1)
+                                      (point))))
+              (when (and (string= symbol-ns ns) (string= symbol-name name))
+                (perform-replace name new-name nil nil nil nil nil word-start original-point)
+                (setq replaced t))
+              (goto-char original-point)))))
+      (save-buffer))))
+
+(defun cljr--rename-occurrences (ns occurrences new-name)
+  (dolist (symbol-meta occurrences)
+    (let* ((file (plist-get symbol-meta :file))
+           (line-beg (plist-get symbol-meta :line-beg))
+           (line-end (plist-get symbol-meta :line-end))
+           (col-beg (plist-get symbol-meta :col-beg))
+           (col-end (plist-get symbol-meta :col-end))
+           (name (plist-get symbol-meta :name)))
+      (cljr--rename-occurrence ns file line-beg line-end col-beg col-end name new-name))))
 
 ;;;###autoload
 (defun cljr-rename-symbol (new-name)
@@ -2391,6 +2448,118 @@ With a prefix the newly created defn will be public."
     (indent-region (point) (point-max))
     (re-search-forward (s-concat "\(" name " ?" unbound))))
 
+(defun cljr--insert-function-stubs (functions)
+  (paredit-forward)
+  (save-excursion
+    (dolist (fn functions)
+      (newline-and-indent)
+      (insert "(" (gethash :name fn) " " (gethash :parameter-list fn) ")")))
+  (when (> (length functions) 0)
+    ;; Move cursor to point where the first functino body goes
+    (paredit-forward-down)
+    (paredit-forward 2)))
+
+;;;###autoload
+(defun cljr-add-stubs ()
+  "Adds implementation stubs for the interface or protocol at point."
+  (interactive)
+  (cljr--ensure-op-supported "stubs-for-interface")
+  (let* ((interface (cider-symbol-at-point))
+         (prefix? (cljr--symbol-prefix interface))
+         (interface (if (not (s-blank? prefix?))
+                        interface
+                      (format "%s/%s" (cider-current-ns) interface)))
+         (functions (edn-read (cljr--call-middleware-sync
+                               (list "op" "stubs-for-interface"
+                                     "interface" interface)
+                               "functions"))))
+    (cljr--insert-function-stubs functions)))
+
+(defun cljr--delete-definition (definition)
+  "Delete a definition as part of inlining a symbol."
+  (let ((file (gethash :file definition))
+        (line-beg (gethash :line-beg definition))
+        (col-beg (gethash :col-beg definition)))
+    (save-excursion
+      (find-file-noselect file)
+      (goto-char (point-min))
+      (forward-line (1- line-beg))
+      (forward-char (1- col-beg))
+      (cljr--delete-and-extract-sexp)
+      (when (cljr--inside-let-binding-form-p)
+        (cljr--delete-and-extract-sexp)
+        (if (save-excursion (cljr--get-let-bindings))
+            (progn
+              (while (looking-at-p "\s*\n")
+                (forward-line)
+                (join-line))
+              (when (looking-at-p "]")
+                ;; we just deleted the last binding in the vector
+                (join-line)))
+          (cljr--eliminate-let))
+        (cljr--indent-defun))
+      (when (looking-at-p "\s*\n")
+        (cljr--just-one-blank-line)))))
+
+(defun cljr--sort-occurrences (occurrences)
+  "Sort the occurrences so the last ones in the file comes first."
+  (-sort (lambda (o1 o2)
+           (let ((o1-line (gethash :line-beg o1))
+                 (o2-line (gethash :line-beg o2))
+                 (o1-col (gethash :col-beg o1))
+                 (o2-col (gethash :col-beg o2)))
+             (cond
+              ((< o1-line o2-line) o2)
+              ((> o1-line o2-line) o1)
+              ((< o1-col o2-col ) o2)
+              ((> o1-col o2-col) o1)
+              (t (error "Sort occurrences failed to compare %s %s %s %s"
+                        o1-line o2-line o1-col o2-col)))))
+         occurrences))
+
+(defun cljr--inline-symbol (ns definition occurrences)
+  (dolist (symbol-meta (cljr--sort-occurrences occurrences))
+    (let* ((file (gethash :file symbol-meta))
+           (line-beg (gethash :line-beg symbol-meta))
+           (line-end (gethash :line-end symbol-meta))
+           (col-beg (gethash :col-beg symbol-meta))
+           (col-end (gethash :col-end symbol-meta))
+           (name (gethash :name symbol-meta))
+           (def (gethash :definition definition)))
+      (cljr--rename-occurrence ns file line-beg line-end col-beg col-end name def)))
+  (cljr--delete-definition definition))
+
+;;;###autoload
+(defun cljr-inline-symbol ()
+  "Inline the symbol at point."
+  (interactive)
+  (cljr--ensure-op-supported "extract-definition")
+  (save-buffer)
+  (let* ((filename (buffer-file-name))
+         (line (line-number-at-pos))
+         (column (1+ (current-column)))
+         (dir (cljr--project-dir))
+         (symbol (cider-symbol-at-point))
+         (var-info (cider-var-info symbol))
+         (ns (nrepl-dict-get var-info "ns"))
+         (symbol-name (or (nrepl-dict-get var-info "name") symbol))
+         (extract-definition-request (list
+                                      "op" "extract-definition"
+                                      "ns" ns
+                                      "dir" dir
+                                      "file" filename
+                                      "line" line
+                                      "column" column
+                                      "name" symbol-name))
+         (response (edn-read (cljr--call-middleware-sync
+                              extract-definition-request "definition")))
+         (definition (gethash :definition response))
+         (occurrences (gethash :occurrences response)))
+    (cljr--inline-symbol ns definition occurrences)
+    (if occurrences
+        (message "Inlined %s occurrence(s) of '%s'" (length occurrences) symbol)
+      (message "No occurrences of '%s' found.  Deleted the definition." symbol))))
+
 (defun cljr--configure-middleware (&optional callback)
   (when (nrepl-op-supported-p "configure")
     (let ((opts (concat "{:prefix-rewriting "
@@ -2466,9 +2635,9 @@ You can mute this warning by changing cljr-suppress-middleware-warnings."
                          (car example-words)
                          " ["
                          (->> example-words
-                           (cdr)
-                           (-map-indexed word->arg)
-                           (s-join " "))
+                              cdr
+                              (-map-indexed word->arg)
+                              (s-join " "))
                          "]\n)")))
     (cljr--new-toplevel-form stub)
     (beginning-of-line)
