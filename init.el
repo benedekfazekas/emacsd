@@ -242,6 +242,11 @@
 
 (setq split-width-threshold 120)
 
+(setq org-todo-keywords
+           '((sequence "TODO(t)" "|" "DONE(d)")
+             (sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
+             (sequence "|" "CANCELED(c)")))
+
 ;; start the day nicely
 (require 'xkcd)
 (add-hook 'emacs-startup-hook 'xkcd-get-latest)
