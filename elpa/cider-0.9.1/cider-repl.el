@@ -336,7 +336,7 @@ If BACKWARD is non-nil search backward."
 (defun cider-repl-end-of-defun ()
   "Move to end of defun."
   (interactive)
-  ;; C.f. `cider-repl-beginning-of-defun.'
+  ;; C.f. `cider-repl-beginning-of-defun'
   (if (and (not (= (point) (point-max)))
            (cider-repl--in-input-area-p))
       (goto-char (point-max))
@@ -755,7 +755,7 @@ Empty strings and duplicates are ignored."
 Search in DIRECTION for REGEXP.
 Return -1 resp the length of the history if no item matches."
   ;; Loop through the history list looking for a matching line
-  (let* ((step (ecase direction
+  (let* ((step (cl-ecase direction
                  (forward -1)
                  (backward 1)))
          (history cider-repl-input-history)
@@ -844,7 +844,7 @@ If USE-CURRENT-INPUT is non-nil, use the current input."
   (cond ((cider-history-search-in-progress-p)
          cider-repl-history-pattern)
         (use-current-input
-         (assert (<= cider-repl-input-start-mark (point)))
+         (cl-assert (<= cider-repl-input-start-mark (point)))
          (let ((str (cider-repl--current-input t)))
            (cond ((string-match-p "^[ \n]*$" str) nil)
                  (t (concat "^" (regexp-quote str))))))
@@ -1045,17 +1045,21 @@ constructs."
         "--"
         ,cider-doc-menu
         "--"
-        ["Jump to source" cider-find-var]
-        ["Jump to resource" cider-find-resource]
-        ["Jump back" cider-jump-back]
+        ("Find"
+         ["Find definition" cider-find-var]
+         ["Find resource" cider-find-resource]
+         ["Jump back" cider-jump-back])
+        "--"
         ["Switch to Clojure buffer" cider-switch-to-last-clojure-buffer]
         "--"
+        ("Macroexpand"
+         ["Macroexpand-1" cider-macroexpand-1]
+         ["Macroexpand-all" cider-macroexpand-all])
+        "--"
         ["Inspect" cider-inspect]
-        ["Macroexpand" cider-macroexpand-1]
-        ["Macroexpand all" cider-macroexpand-all]
-        ["Refresh loaded code" cider-refresh]
         ["Toggle var tracing" cider-toggle-trace-var]
         ["Toggle ns tracing" cider-toggle-trace-ns]
+        ["Refresh loaded code" cider-refresh]
         "--"
         ["Set REPL ns" cider-repl-set-ns]
         ["Toggle pretty printing" cider-repl-toggle-pretty-printing]
@@ -1065,6 +1069,7 @@ constructs."
         ["Clear output" cider-repl-clear-output]
         ["Clear buffer" cider-repl-clear-buffer]
         ["Kill input" cider-repl-kill-input]
+        "--"
         ["Interrupt evaluation" cider-interrupt]
         "--"
         ["Quit" cider-quit]

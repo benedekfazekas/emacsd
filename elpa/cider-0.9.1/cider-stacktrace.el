@@ -148,24 +148,24 @@ cyclical data structures."
 
 (defvar cider-stacktrace-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-p") 'cider-stacktrace-previous-cause)
-    (define-key map (kbd "M-n") 'cider-stacktrace-next-cause)
-    (define-key map (kbd "M-.") 'cider-stacktrace-jump)
-    (define-key map "q" 'cider-popup-buffer-quit-function)
-    (define-key map "j" 'cider-stacktrace-toggle-java)
-    (define-key map "c" 'cider-stacktrace-toggle-clj)
-    (define-key map "r" 'cider-stacktrace-toggle-repl)
-    (define-key map "t" 'cider-stacktrace-toggle-tooling)
-    (define-key map "d" 'cider-stacktrace-toggle-duplicates)
-    (define-key map "a" 'cider-stacktrace-toggle-all)
-    (define-key map "1" 'cider-stacktrace-cycle-cause-1)
-    (define-key map "2" 'cider-stacktrace-cycle-cause-2)
-    (define-key map "3" 'cider-stacktrace-cycle-cause-3)
-    (define-key map "4" 'cider-stacktrace-cycle-cause-4)
-    (define-key map "5" 'cider-stacktrace-cycle-cause-5)
-    (define-key map "0" 'cider-stacktrace-cycle-all-causes)
-    (define-key map [tab] 'cider-stacktrace-cycle-current-cause)
-    (define-key map [backtab] 'cider-stacktrace-cycle-all-causes)
+    (define-key map (kbd "M-p") #'cider-stacktrace-previous-cause)
+    (define-key map (kbd "M-n") #'cider-stacktrace-next-cause)
+    (define-key map (kbd "M-.") #'cider-stacktrace-jump)
+    (define-key map "q" #'cider-popup-buffer-quit-function)
+    (define-key map "j" #'cider-stacktrace-toggle-java)
+    (define-key map "c" #'cider-stacktrace-toggle-clj)
+    (define-key map "r" #'cider-stacktrace-toggle-repl)
+    (define-key map "t" #'cider-stacktrace-toggle-tooling)
+    (define-key map "d" #'cider-stacktrace-toggle-duplicates)
+    (define-key map "a" #'cider-stacktrace-toggle-all)
+    (define-key map "1" #'cider-stacktrace-cycle-cause-1)
+    (define-key map "2" #'cider-stacktrace-cycle-cause-2)
+    (define-key map "3" #'cider-stacktrace-cycle-cause-3)
+    (define-key map "4" #'cider-stacktrace-cycle-cause-4)
+    (define-key map "5" #'cider-stacktrace-cycle-cause-5)
+    (define-key map "0" #'cider-stacktrace-cycle-all-causes)
+    (define-key map [tab] #'cider-stacktrace-cycle-current-cause)
+    (define-key map [backtab] #'cider-stacktrace-cycle-all-causes)
     (easy-menu-define cider-stacktrace-mode-menu map
       "Menu for CIDER's stacktrace mode"
       '("Stacktrace"
@@ -459,12 +459,12 @@ it wraps to 0."
   (with-current-buffer buffer
     (insert "  Show: ")
     (dolist (filter filters)
-      (insert-text-button (first filter)
-                          'filter (second filter)
+      (insert-text-button (car filter)
+                          'filter (cadr filter)
                           'follow-link t
                           'action 'cider-stacktrace-filter
                           'help-echo (format "Toggle %s stack frames"
-                                             (first filter)))
+                                             (car filter)))
       (insert " "))
     (let ((hidden "(0 frames hidden)"))
       (put-text-property 0 (length hidden) 'hidden-count t hidden)
@@ -534,7 +534,7 @@ This associates text properties to enable filtering and source navigation."
   "Set and apply CAUSES initial visibility, filters, and cursor position."
   ;; Partially display outermost cause if it's a compiler exception (the
   ;; description reports reader location of the error).
-  (nrepl-dbind-response (first causes) (class)
+  (nrepl-dbind-response (car causes) (class)
     (when (equal class "clojure.lang.Compiler$CompilerException")
       (cider-stacktrace-cycle-cause (length causes) 1)))
   ;; Fully display innermost cause. This also applies visibility/filters.

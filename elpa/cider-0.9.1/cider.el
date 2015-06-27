@@ -10,8 +10,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 0.9.0-cvs
-;; Package-Requires: ((clojure-mode "4.0.0") (cl-lib "0.5") (dash "2.4.1") (pkg-info "0.4") (emacs "24") (queue "0.1.1"))
+;; Version: 0.9.1
+;; Package-Requires: ((clojure-mode "4.0.0") (dash "2.4.1") (pkg-info "0.4") (emacs "24.3") (queue "0.1.1"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -55,7 +55,7 @@
 ;;; Code:
 
 (defgroup cider nil
-  "Clojure Interactive Development Environment Reimagined."
+  "Clojure Interactive Development Environment that Rocks."
   :prefix "cider-"
   :group 'applications
   :link '(url-link :tag "Github" "https://github.com/clojure-emacs/cider")
@@ -70,7 +70,7 @@
 (require 'cider-debug)
 (require 'tramp-sh)
 
-(defvar cider-version "0.9.0-snapshot"
+(defvar cider-version "0.9.1"
   "Fallback version used when it cannot be extracted automatically.
 Normally it won't be used, unless `pkg-info' fails to extract the
 version from the CIDER package or library.")
@@ -104,7 +104,7 @@ version from the CIDER package or library.")
 (defcustom cider-default-repl-command
   "lein"
   "The default command and parameters to use when connecting to nREPL.
-This value will only be consulted when no identifying file types, ie
+This value will only be consulted when no identifying file types, i.e.
 project.clj for leiningen or build.boot for boot, could be found."
   :type 'string
   :group 'cider
@@ -128,6 +128,11 @@ This variable is used by `cider-connect'."
   "List of functions to call when disconnected from the Clojure nREPL server."
   :type 'hook
   :group 'cider
+  :version "0.9.0")
+
+(defcustom cider-auto-mode t
+  "When non-nil, automatically enable `cider-mode' for all Clojure buffers."
+  :type 'boolean
   :version "0.9.0")
 
 (defvar cider-ps-running-nrepls-command "ps u | grep leiningen"
@@ -207,7 +212,8 @@ Create REPL buffer and start an nREPL client connection."
   "Interactively select the host and port to connect to."
   (let* ((ssh-hosts (cider--ssh-hosts))
          (hosts (-distinct (append (when cider-host-history
-                                     (list (list (car cider-host-history))))
+                                     ;; history elements are strings of the form "host:port"
+                                     (list (split-string (car cider-host-history) ":")))
                                    (list (list (nrepl-current-host)))
                                    cider-known-endpoints
                                    ssh-hosts
@@ -216,24 +222,8 @@ Create REPL buffer and start an nREPL client connection."
                                      (list (list "localhost"))))))
          (sel-host (cider--completing-read-host hosts))
          (host (car sel-host))
-         (local-p (or  (nrepl-local-host-p host)
-                       (not (assoc-string host ssh-hosts))))
-         ;; Each lein-port is a list of the form (dir port)
-         (lein-ports (if local-p
-                         ;; might connect to localhost from a remote file
-                         (let* ((change-dir-p (file-remote-p default-directory))
-                                (default-directory (if change-dir-p "~/" default-directory)))
-                           (cider-locate-running-nrepl-ports (unless change-dir-p default-directory)))
-                       (let ((vec (vector "sshx" nil host "" nil))
-                             ;; might connect to a different remote
-                             (dir (when (file-remote-p default-directory)
-                                    (with-parsed-tramp-file-name default-directory cur
-                                      (when (string= cur-host host) default-directory)))))
-                         (tramp-maybe-open-connection vec)
-                         (with-current-buffer (tramp-get-connection-buffer vec)
-                           (cider-locate-running-nrepl-ports dir)))))
-         (ports (append (cdr sel-host) lein-ports))
-         (port (cider--completing-read-port host ports)))
+         (port (or (cadr sel-host)
+                   (cider--completing-read-port host (cider--infer-ports host ssh-hosts)))))
     (list host port)))
 
 (defun cider--ssh-hosts ()
@@ -253,13 +243,33 @@ Return a list of the form (HOST PORT), where PORT can be nil."
     ;; remove the label
     (if (= 3 (length host)) (cdr host) host)))
 
+(defun cider--infer-ports (host ssh-hosts)
+  "Infer nREPL ports on HOST.
+Return a list of elements of the form (directory port).  SSH-HOSTS is a list
+of remote SSH hosts."
+  (let ((localp (or (nrepl-local-host-p host)
+                    (not (assoc-string host ssh-hosts)))))
+    (if localp
+        ;; change dir: current file might be remote
+        (let* ((change-dir-p (file-remote-p default-directory))
+               (default-directory (if change-dir-p "~/" default-directory)))
+          (cider-locate-running-nrepl-ports (unless change-dir-p default-directory)))
+      (let ((vec (vector "sshx" nil host "" nil))
+            ;; change dir: user might want to connect to a different remote
+            (dir (when (file-remote-p default-directory)
+                   (with-parsed-tramp-file-name default-directory cur
+                     (when (string= cur-host host) default-directory)))))
+        (tramp-maybe-open-connection vec)
+        (with-current-buffer (tramp-get-connection-buffer vec)
+          (cider-locate-running-nrepl-ports dir))))))
+
 (defun cider--completing-read-port (host ports)
   "Interactively select port for HOST from PORTS."
   (let* ((ports (cider-join-into-alist ports))
          (sel-port (completing-read (format "Port for %s: " host) ports
                                     nil nil nil nil (caar ports)))
          (port (or (cdr (assoc sel-port ports)) sel-port))
-         (port (if (listp port) (second port) port)))
+         (port (if (listp port) (cadr port) port)))
     (if (stringp port) (string-to-number port) port)))
 
 (defun cider-locate-running-nrepl-ports (&optional dir)
@@ -270,13 +280,12 @@ of list of the form (project-dir port)."
          (proj-ports (mapcar (lambda (d)
                                (-when-let (port (and d (nrepl-extract-port (cider--file-path d))))
                                  (list (file-name-nondirectory (directory-file-name d)) port)))
-                             (cons (nrepl-project-directory-for dir)
-                                   paths))))
+                             (cons (nrepl-project-directory-for dir) paths))))
     (-distinct (delq nil proj-ports))))
 
 (defun cider--running-nrepl-paths ()
   "Retrieve project paths of running nREPL servers.
-use `cider-ps-running-nrepls-command' and `cider-ps-running-nrepl-path-regexp-list'."
+Use `cider-ps-running-nrepls-command' and `cider-ps-running-nrepl-path-regexp-list'."
   (let (paths)
     (with-temp-buffer
       (insert (shell-command-to-string cider-ps-running-nrepls-command))
@@ -293,8 +302,8 @@ If both project file types are present, prompt the user to choose."
          (lein-project-exists (file-exists-p "project.clj"))
          (boot-project-exists (file-exists-p "build.boot")))
     (cond ((and lein-project-exists boot-project-exists)
-           (completing-read "Which command should be used? " '("lein" "boot") nil
-                            t "lein"))
+           (completing-read "Which command should be used? "
+                            '("lein" "boot") nil t "lein"))
           (lein-project-exists "lein")
           (boot-project-exists "boot"))))
 
@@ -324,7 +333,8 @@ buffer."
   (cider--check-required-nrepl-version)
   (cider--check-required-nrepl-ops)
   (cider--check-middleware-compatibility)
-  (cider-enable-on-existing-clojure-buffers)
+  (when cider-auto-mode
+    (cider-enable-on-existing-clojure-buffers))
   (run-hooks 'cider-connected-hook))
 
 (defun cider--disconnected-handler ()
@@ -338,11 +348,8 @@ process buffer."
 ;;;###autoload
 (eval-after-load 'clojure-mode
   '(progn
-     (define-key clojure-mode-map (kbd "C-c M-j") 'cider-jack-in)
-     (define-key clojure-mode-map (kbd "C-c M-c") 'cider-connect)))
-
-
-(define-obsolete-function-alias 'cider 'cider-connect)
+     (define-key clojure-mode-map (kbd "C-c M-j") #'cider-jack-in)
+     (define-key clojure-mode-map (kbd "C-c M-c") #'cider-connect)))
 
 (provide 'cider)
 

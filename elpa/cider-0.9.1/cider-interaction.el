@@ -177,10 +177,10 @@ backend, and ABBREVIATION is a short form of that type."
   :package-version '(cider . "0.9.0"))
 
 (defcustom cider-completion-annotations-include-ns 'unqualified
-  "Controls passing of namespaces to `cider-annotate-completion-function.'
+  "Controls passing of namespaces to `cider-annotate-completion-function'.
 
 When set to 'always, the candidate's namespace will always be passed if it
-is available. When set to 'unqualified, the namespace will only be passed
+is available.  When set to 'unqualified, the namespace will only be passed
 if the candidate is not namespace-qualified."
   :type '(choice (const always)
                  (const unqualified)
@@ -309,9 +309,8 @@ Signal an error if it is not supported."
 Info contains project name, current REPL namespace, host:port
 endpoint and Clojure version."
   (with-current-buffer (get-buffer connection-buffer)
-    (format "Active nREPL connection: %s:%s, %s:%s (Java %s, Clojure %s, nREPL %s)"
+    (format "Active nREPL connection: %s@%s:%s (Java %s, Clojure %s, nREPL %s)"
             (or (nrepl--project-name nrepl-project-dir) "<no project>")
-            cider-buffer-ns
             (car nrepl-endpoint)
             (cadr nrepl-endpoint)
             (cider--java-version)
@@ -407,7 +406,9 @@ of the namespace in the Clojure source buffer."
   (let ((buffer (current-buffer)))
     (when (eq 4 arg)
       (cider-repl-set-ns (cider-current-ns)))
-    (pop-to-buffer (cider-get-repl-buffer))
+    (if cider-repl-display-in-current-window
+	(pop-to-buffer-same-window (cider-get-repl-buffer))
+      (pop-to-buffer (cider-get-repl-buffer)))
     (cider-remember-clojure-buffer buffer)
     (goto-char (point-max))))
 
@@ -488,7 +489,9 @@ Clojure buffer and the REPL buffer."
   (interactive)
   (if (and (derived-mode-p 'cider-repl-mode)
            (buffer-live-p cider-last-clojure-buffer))
-      (pop-to-buffer cider-last-clojure-buffer)
+      (if cider-repl-display-in-current-window
+          (pop-to-buffer-same-window cider-last-clojure-buffer)
+        (pop-to-buffer cider-last-clojure-buffer))
     (message "Don't know the original Clojure buffer")))
 
 (defun cider-find-and-clear-repl-buffer ()
@@ -506,8 +509,8 @@ Returns to the buffer in which the command was invoked."
 (defvar cider-minibuffer-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
-    (define-key map (kbd "TAB") 'complete-symbol)
-    (define-key map (kbd "M-TAB") 'complete-symbol)
+    (define-key map (kbd "TAB") #'complete-symbol)
+    (define-key map (kbd "M-TAB") #'complete-symbol)
     map)
   "Minibuffer keymap used for reading Clojure expressions.")
 
@@ -520,6 +523,7 @@ reading input."
         (set-syntax-table clojure-mode-syntax-table)
         (add-hook 'completion-at-point-functions
                   #'cider-complete-at-point nil t)
+        (setq-local eldoc-documentation-function #'cider-eldoc)
         (run-hooks 'eval-expression-minibuffer-setup-hook))
     (read-from-minibuffer prompt initial-value
                           cider-minibuffer-map nil
@@ -648,10 +652,12 @@ otherwise, nil."
 
 (defvar cider-from-nrepl-filename-function
   (if (eq system-type 'cygwin)
-      (lambda (resource) (let ((fixed-resource (replace-regexp-in-string "^/" "" resource)))
-                           (replace-regexp-in-string
-                            "\n" ""
-                            (shell-command-to-string (format "cygpath --unix '%s'" fixed-resource)))))
+      (lambda (resource)
+        (let ((fixed-resource (replace-regexp-in-string "^/" "" resource)))
+          (replace-regexp-in-string
+           "\n"
+           ""
+           (shell-command-to-string (format "cygpath --unix '%s'" fixed-resource)))))
     #'identity)
   "Function to translate nREPL namestrings to Emacs filenames.")
 
@@ -1014,7 +1020,7 @@ form, with symbol at point replaced by __prefix__."
 
 (defun cider-completion--get-candidate-type (symbol)
   (let ((type (get-text-property 0 'type symbol)))
-    (or (cl-second (assoc type cider-completion-annotations-alist))
+    (or (cadr (assoc type cider-completion-annotations-alist))
         type)))
 
 (defun cider-completion--get-candidate-ns (symbol)
@@ -1136,7 +1142,7 @@ This is controlled via `cider-interactive-eval-output-destination'."
                       (cider-emit-into-popup-buffer output-buffer output)
                       (pop-to-buffer output-buffer)))
     (`repl-buffer (funcall repl-emit-function output))
-    (t (error "Unsupported value %s for `cider-interactive-eval-output-destination'"
+    (_ (error "Unsupported value %s for `cider-interactive-eval-output-destination'"
               cider-interactive-eval-output-destination))))
 
 (defun cider-emit-interactive-eval-output (output)
@@ -1395,7 +1401,8 @@ If location could not be found, return nil."
         (let ((file (nth 0 info))
               (line (nth 1 info))
               (col (nth 2 info)))
-          (unless (cider--tooling-file-p file)
+          (unless (or (not (stringp file))
+                      (cider--tooling-file-p file))
             (-when-let (buffer (cider-find-file file))
               (with-current-buffer buffer
                 (save-excursion
@@ -1564,59 +1571,22 @@ otherwise fall back to \"user\"."
     #'identity)
   "Function to translate Emacs filenames to nREPL namestrings.")
 
-(defvar-local cider--cached-ns-form nil
-  "Cached ns form in the current buffer.")
+(defvar-local cider--ns-form-cache (make-hash-table :test 'equal)
+  "ns form cache for the current buffer.
 
-(defun cider--ns-form-for-dummy-file (form)
-  "Construct a `(ns ...)` form for `cider--dummy-file-contents'.
+The cache is a hash where the keys are connection names and the values
+are ns forms. This allows every connection to keep track of the ns
+form independently.")
 
-If FORM is a ns form itself, or there is no current ns form, returns an
-empty string. If the current ns form has not yet been evaluated, returns
-the current ns form. Otherwise, returns the current ns form with
-all :reload and :reload-all directives removed."
-  (let ((current-ns-form (cider-ns-form)))
-    (cond
-     ((cider-ns-form-p form) "")
-     ((null current-ns-form) "")
-     ((null cider--cached-ns-form) current-ns-form)
-     ;; previously, we were sending a truncated version of
-     ;; the current ns form if it was equal to the cached ns
-     ;; form, but this causes problems with ClojureScript,
-     ;; where evaluating ns forms is not additive - see #1026
-     (:default (replace-regexp-in-string ":reload\\(-all\\)?\\>"
-                                         ""
-                                         current-ns-form)))))
+(defun cider--cache-ns-form ()
+  "Cache the form in the current buffer for the current connection."
+  (puthash (nrepl-current-connection-buffer)
+           (cider-ns-form)
+           cider--ns-form-cache))
 
-(defun cider--dummy-file-contents (form start-pos)
-  "Wrap FORM to make it suitable for `cider-request:load-file'.
-START-POS is a starting position of the form in the original context."
-  (let* ((ns-form (cider--ns-form-for-dummy-file form))
-         (ns-form-lines (length (split-string ns-form "\n")))
-         (start-pos (or start-pos 1))
-         (start-line (line-number-at-pos start-pos))
-         (start-column (save-excursion (goto-char start-pos) (current-column))))
-    (concat
-     ns-form
-     (make-string (max 0 (- start-line ns-form-lines)) ?\n)
-     (make-string start-column ? )
-     form)))
-
-(defun cider-interactive-source-tracking-eval (form &optional start-pos callback)
-  "Evaluate FORM and dispatch the response to CALLBACK.
-START-POS is a starting position of the form in the original context.
-Unlike `cider-interactive-eval' this command will set proper metadata for var
-definitions.  If CALLBACK
-is nil use `cider-interactive-eval-handler'."
-  (cider--clear-compilation-highlights)
-  (cider--quit-error-window)
-  (setq cider--cached-ns-form (cider-ns-form))
-  (let ((filename (or (buffer-file-name)
-                      (buffer-name))))
-    (cider-request:load-file
-     (cider--dummy-file-contents form start-pos)
-     (funcall cider-to-nrepl-filename-function (cider--server-filename filename))
-     (file-name-nondirectory filename)
-     (or callback (cider-interactive-eval-handler)))))
+(defun cider--cached-ns-form ()
+  "Retrieve the cached ns form for the current buffer & connection."
+  (gethash (nrepl-current-connection-buffer) cider--ns-form-cache))
 
 (defun cider--prep-interactive-eval (form)
   "Prepares the environment for an interactive eval of FORM.
@@ -1628,17 +1598,14 @@ evaluated (so that the ns containing FORM exists).
 Clears any compilation highlights and kills the error window."
   (cider--clear-compilation-highlights)
   (cider--quit-error-window)
-  ;; always eval ns forms in the user namespace
-  ;; otherwise trying to eval ns form for the first time will produce an error
-  (let ((ns (if (cider-ns-form-p form)
-                "user"
-              (cider-current-ns)))
-        (cur-ns-form (cider-ns-form)))
+  (let ((cur-ns-form (cider-ns-form)))
     (when (and cur-ns-form
-               (not (string= cur-ns-form cider--cached-ns-form))
-               (not (string= ns "user")))
-      (cider-eval-ns-form))
-    (setq cider--cached-ns-form cur-ns-form)))
+               (not (string= cur-ns-form (cider--cached-ns-form)))
+               (not (cider-ns-form-p form)))
+      ;; this should probably be done synchronously
+      ;; otherwise an errors in the ns form will go unnoticed
+      (cider-eval-ns-form)
+      (cider--cache-ns-form))))
 
 (defun cider-interactive-eval (form &optional callback)
   "Evaluate FORM and dispatch the response to CALLBACK.
@@ -1649,7 +1616,9 @@ If CALLBACK is nil use `cider-interactive-eval-handler'."
   (nrepl-request:eval
    form
    (or callback (cider-interactive-eval-handler))
-   (cider-current-ns)))
+   ;; always eval ns forms in the user namespace
+   ;; otherwise trying to eval ns form for the first time will produce an error
+   (if (cider-ns-form-p form) "user" (cider-current-ns))))
 
 (defun cider-interactive-pprint-eval (form &optional callback right-margin)
   "Evaluate FORM and dispatch the response to CALLBACK.
@@ -1660,7 +1629,9 @@ the printed result, and defaults to `fill-column'."
   (nrepl-request:pprint-eval
    form
    (or callback (cider-interactive-eval-handler))
-   (cider-current-ns)
+   ;; always eval ns forms in the user namespace
+   ;; otherwise trying to eval ns form for the first time will produce an error
+   (if (cider-ns-form-p form) "user" (cider-current-ns))
    nil
    (or right-margin fill-column)))
 
@@ -1668,7 +1639,7 @@ the printed result, and defaults to `fill-column'."
   "Evaluate the region between START and END."
   (interactive "r")
   (let ((code (buffer-substring-no-properties start end)))
-    (cider-interactive-source-tracking-eval code start)))
+    (cider-interactive-eval code)))
 
 (defun cider-eval-last-sexp (&optional prefix)
   "Evaluate the expression preceding point.
@@ -1716,18 +1687,16 @@ Print its value into the current buffer."
   (interactive)
   (cider--pprint-eval-form (cider-last-sexp)))
 
-(defun cider-eval-defun-at-point (&optional prefix)
+(defun cider-eval-defun-at-point (&optional debug-it)
   "Evaluate the current toplevel form, and print result in the minibuffer.
-With a PREFIX argument, debug the form instead by invoking
-`cider-debug-defun-at-point'."
+With DEBUG-IT prefix argument, debug the form instead by invoking
+the command `cider-debug-defun-at-point'."
   (interactive "P")
-  (if prefix
+  (if debug-it
       (progn (require 'cider-debug)
              (cider-debug-defun-at-point))
-    (cider-interactive-source-tracking-eval
-     (cider-defun-at-point)
-     (cider-defun-at-point-start-pos)
-     (when prefix (cider-eval-print-handler)))))
+    (cider-interactive-eval
+     (cider-defun-at-point))))
 
 (defun cider-pprint-eval-defun-at-point ()
   "Evaluate the top-level form at point and pprint its value in a popup buffer."
@@ -1761,14 +1730,15 @@ With a PREFIX argument, debug the form instead by invoking
 (defun cider-insert-in-repl (form eval)
   "Insert FORM in the REPL buffer and switch to it.
 If EVAL is non-nil the form will also be evaluated."
-  (let ((start-pos (point)))
-    (while (string-match "\\`[ \t\n\r]+\\|[ \t\n\r]+\\'" form)
-      (setq form (replace-match "" t t form)))
-    (with-current-buffer (cider-current-repl-buffer)
+  (while (string-match "\\`[ \t\n\r]+\\|[ \t\n\r]+\\'" form)
+    (setq form (replace-match "" t t form)))
+  (with-current-buffer (cider-current-repl-buffer)
+    (goto-char (point-max))
+    (let ((beg (point)))
       (insert form)
-      (indent-region start-pos (point))
-      (when eval
-        (cider-repl-return))))
+      (indent-region beg (point)))
+    (when eval
+      (cider-repl-return)))
   (cider-switch-to-repl-buffer))
 
 (defun cider-insert-last-sexp-in-repl (&optional arg)
@@ -1801,35 +1771,24 @@ If invoked with a prefix ARG eval the expression after inserting it."
   (interactive)
   (message (read (nrepl-dict-get (nrepl-sync-request:eval "\"PONG\"") "value"))))
 
-(defun clojure-enable-cider ()
-  "Turn on CIDER mode (see command `cider-mode').
-Useful in hooks."
-  (cider-mode 1)
-  (setq next-error-function 'cider-jump-to-compilation-error))
-
-(defun clojure-disable-cider ()
-  "Turn off CIDER mode (see command `cider-mode').
-Useful in hooks."
-  (cider-mode -1))
-
 (defun cider-connected-p ()
   "Return t if CIDER is currently connected, nil otherwise."
   (nrepl-current-connection-buffer 'no-error))
 
 (defun cider-ensure-connected ()
   "Ensure there is a cider connection present, otherwise
-an error is signalled."
+an error is signaled."
   (unless (cider-connected-p)
     (error "No active nREPL connection")))
 
 (defun cider-enable-on-existing-clojure-buffers ()
-  "Enable interaction mode on existing Clojure buffers.
+  "Enable CIDER's minor mode on existing Clojure buffers.
 See command `cider-mode'."
   (interactive)
-  (add-hook 'clojure-mode-hook 'clojure-enable-cider)
+  (add-hook 'clojure-mode-hook #'cider-mode)
   (dolist (buffer (cider-util--clojure-buffers))
     (with-current-buffer buffer
-      (clojure-enable-cider))))
+      (cider-mode +1))))
 
 (defun cider-disable-on-existing-clojure-buffers ()
   "Disable `cider-mode' on existing Clojure buffers.
@@ -1837,28 +1796,12 @@ See command `cider-mode'."
   (interactive)
   (dolist (buffer (cider-util--clojure-buffers))
     (with-current-buffer buffer
-      (clojure-disable-cider))))
+      (cider-mode -1))))
 
 (defun cider-possibly-disable-on-existing-clojure-buffers ()
   "If not connected, disable `cider-mode' on existing Clojure buffers."
   (unless (cider-connected-p)
     (cider-disable-on-existing-clojure-buffers)))
-
-(defun cider-fetch-vars-form (ns)
-  "Construct a Clojure form to read vars inside for NS."
-  `(concat (if (find-ns (symbol ,ns))
-               (map name (concat (keys (ns-interns (symbol ,ns)))
-                                 (keys (ns-refers (symbol ,ns))))))
-           (if (not= "" ,ns) [".."])
-           (->> (all-ns)
-                (map (fn [n]
-                         (re-find (re-pattern (str "^" (if (not= ,ns "")
-                                                           (str ,ns "\\."))
-                                                   "[^\\.]+"))
-                                  (str n))))
-                (filter identity)
-                (map (fn [n] (str n "/")))
-                (into (hash-set)))))
 
 (defun cider-parent-ns (ns)
   "Go up a level of NS.
@@ -1902,7 +1845,7 @@ On failure, read a symbol name using PROMPT and call CALLBACK with that."
     (pcase var-status
       ("not-found" (error "Var %s not found" sym))
       ("not-traceable" (error "Var %s can't be traced because it's not bound to a function" var-name))
-      (t (message "Var %s %s" var-name var-status)))))
+      (_ (message "Var %s %s" var-name var-status)))))
 
 (defun cider-toggle-trace-var (arg)
   "Toggle var tracing.
@@ -1935,7 +1878,7 @@ Defaults to the current ns.  With prefix arg QUERY, prompts for a ns."
            (ns-status (nrepl-dict-get trace-response "ns-status")))
       (pcase ns-status
         ("not-found" (error "ns %s not found" ns))
-        (t (message "ns %s %s" ns ns-status))))))
+        (_ (message "ns %s %s" ns ns-status))))))
 
 (defun cider-create-doc-buffer (symbol)
   "Populates *cider-doc* with the documentation for SYMBOL."
@@ -2008,7 +1951,7 @@ unconditionally."
                                      (buffer-file-name))))))
   (cider--clear-compilation-highlights)
   (cider--quit-error-window)
-  (setq cider--cached-ns-form (cider-ns-form))
+  (cider--cache-ns-form)
   (cider-request:load-file
    (cider-file-string filename)
    (funcall cider-to-nrepl-filename-function (cider--server-filename filename))
@@ -2017,7 +1960,8 @@ unconditionally."
 
 (defun cider-load-buffer (&optional buffer)
   "Load (eval) BUFFER's file in nREPL.
-If no buffer is provided the command acts on the current buffer."
+If no buffer is provided the command acts on the current buffer.
+The heavy lifting is done by `cider-load-file'."
   (interactive)
   (check-parens)
   (setq buffer (or buffer (current-buffer)))
@@ -2166,7 +2110,13 @@ Quitting closes all active nREPL connections and kills all CIDER buffers."
       (when connection
         (nrepl-close connection)))
     (message "All active nREPL connections were closed")
-    (cider-close-ancillary-buffers)))
+    (cider-close-ancillary-buffers)
+    ;; clean the cached ns forms in all Clojure buffers
+    ;; as we don't track which buffer is associated with
+    ;; which connection we simply clean the cache for all buffers
+    (dolist (clojure-buffer (cider-util--clojure-buffers))
+      (with-current-buffer clojure-buffer
+        (setq cider--ns-form-cache (make-hash-table :test 'equal))))))
 
 (defun cider-restart (&optional prompt-project)
   "Quit CIDER and restart it.

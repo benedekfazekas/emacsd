@@ -179,13 +179,13 @@ loaded. If CALLBACK is nil, use `cider-load-file-handler'."
 
 (defun cider-sync-request:complete (str context)
   "Return a list of completions for STR using nREPL's \"complete\" op."
-  (-> (list "op" "complete"
-            "session" (nrepl-current-session)
-            "ns" (cider-current-ns)
-            "symbol" str
-            "context" context)
-      (nrepl-send-sync-request)
-      (nrepl-dict-get "completions")))
+  (-when-let (dict (-> (list "op" "complete"
+                             "session" (nrepl-current-session)
+                             "ns" (cider-current-ns)
+                             "symbol" str
+                             "context" context)
+                       (nrepl-send-sync-request 'abort-on-input)))
+    (nrepl-dict-get dict "completions")))
 
 (defun cider-sync-request:info (symbol &optional class member)
   "Send \"info\" op with parameters SYMBOL or CLASS and MEMBER."
@@ -202,13 +202,13 @@ loaded. If CALLBACK is nil, use `cider-load-file-handler'."
 
 (defun cider-sync-request:eldoc (symbol &optional class member)
   "Send \"eldoc\" op with parameters SYMBOL or CLASS and MEMBER."
-  (let ((eldoc (-> `("op" "eldoc"
-                     "session" ,(nrepl-current-session)
-                     "ns" ,(cider-current-ns)
-                     ,@(when symbol (list "symbol" symbol))
-                     ,@(when class (list "class" class))
-                     ,@(when member (list "member" member)))
-                   (nrepl-send-sync-request))))
+  (-when-let (eldoc (-> `("op" "eldoc"
+                          "session" ,(nrepl-current-session)
+                          "ns" ,(cider-current-ns)
+                          ,@(when symbol (list "symbol" symbol))
+                          ,@(when class (list "class" class))
+                          ,@(when member (list "member" member)))
+                        (nrepl-send-sync-request 'abort-on-input)))
     (if (member "no-eldoc" (nrepl-dict-get eldoc "status"))
         nil
       eldoc)))
@@ -258,7 +258,7 @@ loaded. If CALLBACK is nil, use `cider-load-file-handler'."
     (when err
       ;; err will be a stacktrace with a first line that looks like:
       ;; "clojure.lang.ExceptionInfo: Unmatched delimiter ]"
-      (error (first (split-string err "\n"))))
+      (error (car (split-string err "\n"))))
     (nrepl-dict-get response "formatted-edn")))
 
 (provide 'cider-client)
