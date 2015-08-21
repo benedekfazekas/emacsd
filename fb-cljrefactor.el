@@ -13,4 +13,14 @@
 ;; no auto sort, thx
 (setq cljr-auto-sort-ns nil)
 
+;; no prefix notation, thx
 (setq cljr-favor-prefix-notation nil)
+
+;; no multiple cursors
+(setq cljr-use-multiple-cursors nil)
+
+;; some debug info ftw
+(setq cljr--debug-mode t)
+
+;; use find usages even if stuff is broken
+(setq cljr-find-usages-ignore-analyzer-errors t)

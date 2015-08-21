@@ -78,6 +78,13 @@
 ;;(add-to-list 'load-path (concat dotfiles-dir "/minimap"))
 ;;(require 'minimap)
 
+(defun toggle-font-height ()
+  (interactive)
+  (let ((font-height (face-attribute 'default :height)))
+    (if (= 130 font-height)
+        (set-face-attribute 'default nil :height 180)
+      (set-face-attribute 'default nil :height 130))))
+
 ;; Key Bindings
 (global-set-key (kbd "<C-f11>") 'cider-jack-in)
 (global-set-key (kbd "<f11>") 'ns-toggle-fullscreen)
@@ -94,6 +101,7 @@
                   (interactive)
                   (join-line -1)))
 (global-set-key (kbd "M-i") 'indent-buffer-sans-prettification)
+(global-set-key (kbd "C-x M-f") 'toggle-font-height)
 
 (setq backup-inhibited 'anyvaluebutnil )
 
@@ -123,13 +131,6 @@
 
 ;; rainbows
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
-;; hl-sexp
-(require 'hl-sexp)
-
-(add-hook 'clojure-mode-hook 'hl-sexp-mode)
-(add-hook 'lisp-mode-hook 'hl-sexp-mode)
-(add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
 
 ;; highlight symbols
 (add-hook 'clojure-mode-hook 'idle-highlight-mode)
