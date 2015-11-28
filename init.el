@@ -17,7 +17,7 @@
  '(custom-enabled-themes (quote (sanityinc-tomorrow-eighties)))
  '(custom-safe-themes
    (quote
-    ("628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" default)))
+    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" default)))
  '(safe-local-variable-values
    (quote
     ((ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
@@ -82,8 +82,11 @@
   (interactive)
   (let ((font-height (face-attribute 'default :height)))
     (if (= 130 font-height)
-        (set-face-attribute 'default nil :height 180)
-      (set-face-attribute 'default nil :height 130))))
+        (progn
+          (set-face-attribute 'default nil :height 180)
+          (toggle-frame-maximized))
+      (set-face-attribute 'default nil :height 130)
+      (toggle-frame-maximized))))
 
 ;; Key Bindings
 (global-set-key (kbd "<C-f11>") 'cider-jack-in)
@@ -223,6 +226,13 @@
 
 ;;(set-variable 'magit-emacsclient-executable "/usr/bin/emacsclient")
 
+(sml/setup)
+(add-to-list 'sml/replacer-regexp-list '("^~/Downloads/" ":Dwn:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/projects/tmp/" ":projtmp:") t)
+(add-to-list 'sml/replacer-regexp-list '("^~/projects/" ":proj:") t)
+(add-to-list 'sml/replacer-regexp-list '("^/tmp/" ":TMP:") t)
+
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -240,6 +250,14 @@
  '(rainbow-delimiters-unmatched-face ((t (:foreground "Red")))))
 
 (setq-default indent-tabs-mode nil)
+
+(eval-after-load 'company-etags
+  '(progn
+     (add-to-list 'company-etags-modes 'js2-mode)))
+
+(add-to-list 'auto-mode-alist '("\.js$" . js2-mode))
+
+(add-hook 'after-init-hook 'global-company-mode)
 
 (setq split-width-threshold 120)
 

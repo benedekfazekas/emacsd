@@ -23,4 +23,4 @@
 (setq cljr--debug-mode t)
 
 ;; use find usages even if stuff is broken
-(setq cljr-find-usages-ignore-analyzer-errors t)
+(setq cljr-ignore-analyzer-errors t)
