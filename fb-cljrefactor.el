@@ -24,3 +24,9 @@
 
 ;; use find usages even if stuff is broken
 (setq cljr-ignore-analyzer-errors t)
+
+;; no network load on startup
+;;(setq cljr-populate-artifact-cache-on-startup nil)
+
+;; feel free to eval the project
+(setq cljr-warn-on-eval nil)

@@ -22,11 +22,11 @@
 ;; pretty priting
 (setq cider-repl-toggle-pretty-printing t)
 
-;; debug nrepl msgs
-;;(setq nrepl-log-messages t)
-
 (global-set-key (kbd "C-c n c") 'nrepl-close)
 ;; closes *all* REPLs
 (global-set-key (kbd "C-c n q") 'cider-quit)
 
 (global-set-key (kbd "M-p") 'cider-eval-print-last-sexp)
+
+;; use pprint for now
+(setq cider-pprint-fn 'pprint)
