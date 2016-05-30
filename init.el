@@ -26,7 +26,9 @@
  '(neo-theme (quote ascii))
  '(safe-local-variable-values
    (quote
-    ((bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
+    ((checkdoc-package-keywords-flag)
+     (clojure-defun-style-default-indent . t)
+     (bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
      (ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
      (ffip-find-options . "-not -regex \".*out-.*\""))))
  '(speedbar-frame-parameters
@@ -95,7 +97,7 @@
 (dolist (source '(
                   ;;("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
                   ("melpa" . "http://melpa.milkbox.net/packages/")
-                  ("marmalade" . "http://marmalade-repo.org/packages/")
+                  (";marmalade" . "http://marmalade-repo.org/packages/")
                   ("elpa" . "http://tromey.com/elpa/")
                   ))
   (add-to-list 'package-archives source t))
@@ -210,7 +212,7 @@
 (setq cider-toggle-pretty-printing t)
 
 ;; eldoc
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+(add-hook 'cider-mode-hook #'eldoc-mode)
 
 ;; Markdown mode
 (autoload 'markdown-mode "markdown-mode.el" "Major mode for editing Markdown files" t)
