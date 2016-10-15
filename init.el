@@ -234,6 +234,7 @@
 (dolist (file '(
                 "fb-autocomplete.el"
 		"jp-ace-jump-mode.el"
+                "aws.el"
                 ;;		"jp-erc.el"
 		"jp-multiple-cursors.el"
 		"jp-html"
@@ -247,6 +248,8 @@
   (load (concat dotfiles-dir file)))
 
 (load "~/sqldefs.el")
+
+(global-set-key (kbd "C-x M-a") 'aws-authenticate)
 
 (global-auto-revert-mode t)
 (put 'erase-buffer 'disabled nil)
