@@ -32,7 +32,7 @@
 (require 'cider-client)
 (require 'cider-popup)
 (require 'cider-stacktrace)
-(require 'cider-compat)
+(require 'subr-x)
 (require 'cider-overlays)
 
 (require 'button)
@@ -198,7 +198,8 @@
 
 \\{cider-test-report-mode-map}"
   (setq buffer-read-only t)
-  (setq-local truncate-lines t)
+  (when cider-special-mode-truncate-lines
+    (setq-local truncate-lines t))
   (setq-local electric-indent-chars nil))
 
 ;; Report navigation

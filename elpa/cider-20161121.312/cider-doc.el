@@ -26,7 +26,7 @@
 ;;; Code:
 
 (require 'cider-common)
-(require 'cider-compat)
+(require 'subr-x)
 (require 'cider-util)
 (require 'cider-popup)
 (require 'cider-client)
@@ -168,7 +168,8 @@
 
 \\{cider-docview-mode-map}"
   (setq buffer-read-only t)
-  (setq-local truncate-lines t)
+  (when cider-special-mode-truncate-lines
+    (setq-local truncate-lines t))
   (setq-local electric-indent-chars nil)
   (setq-local cider-docview-symbol nil)
   (setq-local cider-docview-javadoc-url nil)

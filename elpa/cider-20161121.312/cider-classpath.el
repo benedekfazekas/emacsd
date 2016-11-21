@@ -25,7 +25,7 @@
 
 (require 'cider-client)
 (require 'cider-popup)
-(require 'cider-compat)
+(require 'subr-x)
 
 (defvar cider-classpath-buffer "*cider-classpath*")
 
@@ -50,7 +50,8 @@
 \\{cider-classpath-mode-map}"
   (setq buffer-read-only t)
   (setq-local electric-indent-chars nil)
-  (setq-local truncate-lines t))
+  (when cider-special-mode-truncate-lines
+    (setq-local truncate-lines t)))
 
 (defun cider-classpath-list (buffer items)
   "Populate BUFFER with ITEMS."
