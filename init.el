@@ -26,7 +26,8 @@
  '(neo-theme (quote ascii))
  '(safe-local-variable-values
    (quote
-    ((checkdoc-package-keywords-flag)
+    ((nameless-current-name . cljr)
+     (checkdoc-package-keywords-flag)
      (clojure-defun-style-default-indent . t)
      (bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
      (ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
@@ -213,6 +214,15 @@
 
 ;; eldoc
 (add-hook 'cider-mode-hook #'eldoc-mode)
+
+;; nameless mode
+(add-hook 'emacs-lisp-mode-hook #'nameless-mode)
+(setq nameless-discover-current-name nil);; no guessing
+(setq nameless-private-prefix t)
+(setq nameless-global-aliases '(("s" . "seq")
+                                ("c" . "cider")
+                                ("clj" . "clojure")
+                                ("r" . "cljr")))
 
 ;; Markdown mode
 (autoload 'markdown-mode "markdown-mode.el" "Major mode for editing Markdown files" t)

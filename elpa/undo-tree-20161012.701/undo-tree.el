@@ -3,8 +3,9 @@
 ;; Copyright (C) 2009-2014  Free Software Foundation, Inc
 
 ;; Author: Toby Cubitt <toby-undo-tree@dr-qubit.org>
-;; Version: 20140110.616
-;; X-Original-Version: 0.6.6
+;; Maintainer: Toby Cubitt <toby-undo-tree@dr-qubit.org>
+;; Version: 0.6.6
+;; Package-Version: 20161012.701
 ;; Keywords: convenience, files, undo, redo, history, tree
 ;; URL: http://www.dr-qubit.org/emacs.php
 ;; Repository: http://www.dr-qubit.org/git/undo-tree.git
@@ -411,7 +412,7 @@
 ;;                       o  o     o     o     o     o
 ;;                       |  |\    |\    |\    |\    |
 ;;                       |  | \   | \   | \   | \   |
-;;                       o  o  |  |  o  o  o  |  o  o
+;;                       o  o  |  |  o  o  |  |  o  o
 ;;                       | /   |  |  | /   |  |  | /
 ;;                       |/    |  |  |/    |  |  |/
 ;;      (already undid   o     |  |  o<.   |  |  o
@@ -587,7 +588,7 @@
 ;; Finally, hitting "q" will quit the visualizer, leaving the parent buffer in
 ;; whatever state you ended at. Hitting "C-q" will abort the visualizer,
 ;; returning the parent buffer to whatever state it was originally in when the
-;; visualizer was .
+;; visualizer was invoked.
 ;;
 ;;
 ;;
@@ -1715,13 +1716,13 @@ Comparison is done with `eq'."
 (defun undo-tree-copy-list (undo-list)
   ;; Return a deep copy of first changeset in `undo-list'. Object id's are
   ;; replaced by corresponding objects from `buffer-undo-tree' object-pool.
-  (when undo-list
     (let (copy p)
       ;; if first element contains an object id, replace it with object from
       ;; pool, discarding element entirely if it's been GC'd
-      (while (null copy)
+    (while (and undo-list (null copy))
 	(setq copy
 	      (undo-tree-restore-GC-elts-from-pool (pop undo-list))))
+    (when copy
       (setq copy (list copy)
 	    p copy)
       ;; copy remaining elements, replacing object id's with objects from
