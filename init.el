@@ -2,8 +2,6 @@
 ;; Better dead than smeg.
 ;; ----------------------
 
-(buffer-file-name)
-
 ;; Add .emacs.d to load-path
 (setq dotfiles-dir (file-name-directory
                     (or (buffer-file-name) load-file-name)))
