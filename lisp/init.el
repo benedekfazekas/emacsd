@@ -2,12 +2,11 @@
 ;; Better dead than smeg.
 ;; ----------------------
 
-(buffer-file-name)
 
 ;; Add .emacs.d to load-path
 (setq dotfiles-dir (file-name-directory
                     (or (buffer-file-name) load-file-name)))
-(add-to-list 'load-path (concat dotfiles-dir "lisp/"))
+(add-to-list 'load-path dotfiles-dir)
 
 ;; speedbar config
 (custom-set-variables
@@ -256,7 +255,7 @@
                 "fb-sotlisp"
                 ;;		"jp-nrepl"
 		"jp-lnf.el"))
-  (load (concat dotfiles-dir "lisp/" file)))
+  (load (concat dotfiles-dir file)))
 
 (load "~/sqldefs.el")
 
