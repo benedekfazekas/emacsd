@@ -1,13 +1,3 @@
-;; (use-package
-;;  color-theme-sanityinc-tomorrow-eighties
-;;  :ensure t
-;;  :config (color-theme-sanityinc-tomorrow-eighties))
-
-(use-package zenburn-theme
-  :ensure t
-  :config
-  (load-theme 'zenburn t))
-
 ;;(menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
@@ -30,3 +20,5 @@
 ;; y/n hassle
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq split-width-threshold 120)
+
+(global-prettify-symbols-mode 1)

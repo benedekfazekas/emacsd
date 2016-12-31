@@ -1,6 +1,15 @@
 ; testing purposes
 (setq user-emacs-directory "~/emacsd/")
 
+(setq cfgfiles-lisp-dir (expand-file-name "lisp/" user-emacs-directory))
+
+;; cfg mac related stuff
+;; todo: only load if on mac
+(load (concat cfgfiles-lisp-dir "cfg-mac.el"))
+
+;; cfg misc stuff
+(load (concat cfgfiles-lisp-dir "cfg-emacs-core.el"))
+
 ;; init package to install use-package
 (require 'package)
 
@@ -22,15 +31,10 @@
 (require 'use-package)
 (setq use-package-verbose t)
 
-(setq cfgfiles-lisp-dir (expand-file-name "lisp/" user-emacs-directory))
-
 (add-to-list 'load-path cfgfiles-lisp-dir)
 
 ;; cfg theme and ux related stuff
-(load (concat cfgfiles-lisp-dir "cfg-themes-ux.el"))
-
-;; cfg mac related stuff
-(load (concat cfgfiles-lisp-dir "cfg-mac.el"))
+(load (concat cfgfiles-lisp-dir "cfg-themes.el"))
 
 ;; cfg misc stuff
 (load (concat cfgfiles-lisp-dir "cfg-misc.el"))
