@@ -15,6 +15,24 @@
  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
 
 (use-package
+ rainbow-delimiters
+ :ensure t
+ :pin melpa-stable
+ :config
+ (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+
+(use-package
  yasnippet
  :ensure t
  :pin melpa-stable)
+
+(use-package
+ smart-mode-line
+ :ensure t
+ :pin melpa-stable
+ :config
+ (sml/setup)
+ (add-to-list 'sml/replacer-regexp-list '("^~/Downloads/" ":Dwn:") t)
+ (add-to-list 'sml/replacer-regexp-list '("^~/projects/tmp/" ":projtmp:") t)
+ (add-to-list 'sml/replacer-regexp-list '("^~/projects/" ":proj:") t)
+ (add-to-list 'sml/replacer-regexp-list '("^/tmp/" ":TMP:") t))
