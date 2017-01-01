@@ -1,1 +1,14 @@
 elpa*
+*~
+*.elc
+auto-save-list/*
+ac-comphist.dat
+url
+swank
+.mc-lists.el
+nrepl-history
+cider-history
+bookmarks
+request
+\#*\#
+tramp
