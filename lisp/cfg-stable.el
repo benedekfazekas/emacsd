@@ -31,6 +31,7 @@
  :ensure t
  :pin melpa-stable
  :config
+ (setq sml/no-confirm-load-theme t)
  (sml/setup)
  (add-to-list 'sml/replacer-regexp-list '("^~/Downloads/" ":Dwn:") t)
  (add-to-list 'sml/replacer-regexp-list '("^~/projects/tmp/" ":projtmp:") t)
