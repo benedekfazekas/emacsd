@@ -1,5 +1,7 @@
-; testing purposes
-(setq user-emacs-directory "~/emacsd/")
+;;
+;;
+;;
+
 
 (setq cfgfiles-lisp-dir (expand-file-name "lisp/" user-emacs-directory))
 
@@ -33,7 +35,7 @@
 (when (memq window-system '(mac))
   (load (concat cfgfiles-lisp-dir "cfg-mac.el")))
 
-;; cfg theme and ux related stuff
+;; cfg theme related stuff
 (load (concat cfgfiles-lisp-dir "cfg-themes.el"))
 
 ;; cfg misc stuff

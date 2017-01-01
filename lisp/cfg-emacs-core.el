@@ -1,4 +1,4 @@
-(load-file "customize.el")
+(load-file (concat user-emacs-directory "customize.el"))
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
