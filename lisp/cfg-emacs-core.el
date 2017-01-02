@@ -1,4 +1,12 @@
-(load-file (concat user-emacs-directory "customize.el"))
+;; reduce the frequency of garbage collection by making it happen on
+;; each 50MB of allocated data (the default is on every 0.76MB)
+(setq gc-cons-threshold 50000000)
+
+;; warn when opening files bigger than 100MB
+(setq large-file-warning-threshold 100000000)
+
+;; disable the annoying bell ring
+(setq ring-bell-function 'ignore)
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -41,9 +49,6 @@
 
 ;; no indent with tabs
 (setq-default indent-tabs-mode nil)
-
-;; make duplicate buffer names unique
-(setq uniquify-buffer-name-style 'forward)
 
 ;; comment/uncomment sexp (Malabarba)
 (load (concat cfgfiles-lisp-dir "sotlisp.el"))

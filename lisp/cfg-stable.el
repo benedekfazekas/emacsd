@@ -37,3 +37,15 @@
  (add-to-list 'sml/replacer-regexp-list '("^~/projects/tmp/" ":projtmp:") t)
  (add-to-list 'sml/replacer-regexp-list '("^~/projects/" ":proj:") t)
  (add-to-list 'sml/replacer-regexp-list '("^/tmp/" ":TMP:") t))
+
+(use-package
+  xkcd
+  :ensure t
+  :pin melpa-stable
+  :config
+  (add-hook 'emacs-startup-hook 'xkcd-get-latest))
+
+(use-package uniquify
+  ;; make duplicate buffer names unique
+  :config
+  (setq uniquify-buffer-name-style 'forward))

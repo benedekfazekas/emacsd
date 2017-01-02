@@ -75,3 +75,32 @@
  ;;(setq cljr-populate-artifact-cache-on-startup nil)
  ;; feel free to eval the project
  (setq cljr-warn-on-eval nil))
+
+;; nameless for elisp
+
+(use-package
+  nameless
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook #'nameless-mode)
+  (setq nameless-discover-current-name nil);; no guessing
+  (setq nameless-private-prefix t)
+  (setq nameless-global-aliases '(("s" . "seq")
+                                  ("c" . "cider")
+                                  ("clj" . "clojure")
+                                  ("r" . "cljr"))))
+
+(use-package markdown-mode
+  :ensure t
+  :config
+  (setq auto-mode-alist (cons '("\\.markdown" . markdown-mode) auto-mode-alist))
+  (setq auto-mode-alist (cons '("\\.md" . markdown-mode) auto-mode-alist)))
+
+(use-package org-mode
+  :config
+  (setq org-export-html-postamble nil)
+  (setq org-src-fontify-natively t)
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "|" "DONE(d)")
+          (sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
+          (sequence "|" "CANCELLED(c)"))))

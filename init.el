@@ -1,7 +1,39 @@
-;;
-;;
-;;
+;;; init.el -- Emacs config
 
+;; Author: Benedek Fazekas <benedek.fazekas@gmail.com>
+;; URL: https://github.com/benedekfazekas/emacsd
+
+;;; Commentary:
+
+;; I have forgotten much that I thought I knew, and learned again much
+;; that I had forgotten. I can see many things far off, but many things
+;; that are close at hand I cannot see.
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "selectedMenuItemColor"))))
+ '(rainbow-delimiters-depth-3-face ((t (:foreground "Yellow"))))
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "Green"))))
+ '(rainbow-delimiters-depth-5-face ((t (:foreground "Orange"))))
+ '(rainbow-delimiters-depth-6-face ((t (:foreground "Magenta"))))
+ '(rainbow-delimiters-depth-7-face ((t (:foreground "Brown"))))
+ '(rainbow-delimiters-depth-8-face ((t (:foreground "Purple"))))
+ '(rainbow-delimiters-depth-9-face ((t (:foreground "White"))))
+ '(rainbow-delimiters-unmatched-face ((t (:foreground "Red")))))
+
+;; Always load newest byte code
+(setq load-prefer-newer t)
 
 (setq cfgfiles-lisp-dir (expand-file-name "lisp/" user-emacs-directory))
 
@@ -46,3 +78,5 @@
 
 ;; cfg unstable packages
 (load (concat cfgfiles-lisp-dir "cfg-edge.el"))
+
+;;; init.el ends here
