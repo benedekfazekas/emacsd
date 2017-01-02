@@ -7,3 +7,10 @@
   (toggle-frame-maximized))
 
 (global-set-key (kbd "C-x M-f") 'toggle-maximized-with-font)
+
+(defun bf--maxframe ()
+  (if (> (display-pixel-width) 1280)
+      (toggle-maximized-with-font)
+    (toggle-frame-maximized)))
+
+(add-hook 'emacs-startup-hook 'bf--maxframe)
