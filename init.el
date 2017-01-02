@@ -16,7 +16,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package))))
+    (web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -78,5 +78,8 @@
 
 ;; cfg unstable packages
 (load (concat cfgfiles-lisp-dir "cfg-edge.el"))
+
+;; aws authenticate
+(load (concat cfgfiles-lisp-dir "aws.el"))
 
 ;;; init.el ends here

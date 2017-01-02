@@ -52,3 +52,13 @@
 
 ;; comment/uncomment sexp (Malabarba)
 (load (concat cfgfiles-lisp-dir "sotlisp.el"))
+
+;;(setq backup-inhibited 'anyvaluebutnil )
+
+;; custom keys
+(global-set-key (kbd "ESC M-f") 'rgrep)
+(global-set-key
+ (kbd "M-j")
+ (lambda ()
+   (interactive)
+   (join-line -1)))
