@@ -16,7 +16,12 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package))))
+    (web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+ '(safe-local-variable-values
+   (quote
+    ((bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
+     (ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
+     (ffip-find-options . "-not -regex \".*out-.*\"")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -37,8 +42,10 @@
 
 (setq cfgfiles-lisp-dir (expand-file-name "lisp/" user-emacs-directory))
 
+(add-to-list 'load-path cfgfiles-lisp-dir)
+
 ;; cfg core emacs
-(load (concat cfgfiles-lisp-dir "cfg-emacs-core.el"))
+(load "cfg-emacs-core.el")
 
 ;; init package to install use-package
 (require 'package)
@@ -61,25 +68,20 @@
 (require 'use-package)
 (setq use-package-verbose t)
 
-(add-to-list 'load-path cfgfiles-lisp-dir)
-
 ;; cfg mac related stuff
 (when (memq window-system '(mac))
-  (load (concat cfgfiles-lisp-dir "cfg-mac.el")))
+  (load "cfg-mac.el"))
 
 ;; cfg theme related stuff
-(load (concat cfgfiles-lisp-dir "cfg-themes.el"))
+(load "cfg-themes.el")
 
 ;; cfg misc stuff
-(load (concat cfgfiles-lisp-dir "cfg-misc.el"))
+(load "cfg-misc.el")
 
-;; cfg stable packages
-(load (concat cfgfiles-lisp-dir "cfg-stable.el"))
-
-;; cfg unstable packages
-(load (concat cfgfiles-lisp-dir "cfg-edge.el"))
+;; cfg packages
+(load "cfg-packages.el")
 
 ;; aws authenticate
-(load (concat cfgfiles-lisp-dir "aws.el"))
+(load "aws.el")
 
 ;;; init.el ends here
