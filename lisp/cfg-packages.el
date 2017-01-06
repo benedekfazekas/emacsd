@@ -1,10 +1,20 @@
 ;; stable packages
 
+(defun my/magit-cursor-fix ()
+  (beginning-of-buffer)
+  (when (looking-at "#")
+    (forward-line 2)))
+
 (use-package
  magit
  :ensure t
  :pin melpa-stable
- :bind ("C-x g" . magit-status))
+ :bind ("C-x g" . magit-status)
+ :config
+ (set-default 'magit-revert-buffers 'silent)
+ (set-default 'magit-no-confirm '(stage-all-changes
+                                  unstage-all-changes))
+ (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix))
 
 (use-package
  paredit
@@ -174,6 +184,7 @@
 (use-package org-mode
   :config
   (setq org-export-html-postamble nil)
+  ;; Fontify org-mode code blocks
   (setq org-src-fontify-natively t)
   (setq org-todo-keywords
         '((sequence "TODO(t)" "|" "DONE(d)")
