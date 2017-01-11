@@ -190,3 +190,8 @@
         '((sequence "TODO(t)" "|" "DONE(d)")
           (sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
           (sequence "|" "CANCELLED(c)"))))
+
+(use-package restclient
+  :ensure t
+  :config
+  (setq restclient-same-buffer-response nil))

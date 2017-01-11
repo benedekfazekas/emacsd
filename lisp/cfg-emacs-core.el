@@ -33,7 +33,7 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 
 ;; set a nice split window threshold
-(setq split-width-threshold 120)
+(setq split-width-threshold 130)
 
 ;; go on, prettify
 (global-prettify-symbols-mode 1)
