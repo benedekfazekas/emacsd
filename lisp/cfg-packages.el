@@ -1,5 +1,3 @@
-;; stable packages
-
 (defun my/magit-cursor-fix ()
   (beginning-of-buffer)
   (when (looking-at "#")
@@ -79,9 +77,18 @@
     (local-set-key (kbd "RET") 'newline-and-indent))
   (add-hook 'web-mode-hook  'bf--web-mode-hook))
 
+(use-package haml-mode
+  :ensure t
+  :pin melpa-stable)
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; unstable packages
 ;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package auto-complete
+  :ensure t
+  :config
+  (ac-config-default))
 
 ;;;;;;;;;;;;;;
 ;; Clojure
@@ -195,3 +202,18 @@
   :ensure t
   :config
   (setq restclient-same-buffer-response nil))
+
+(use-package go-mode
+  :ensure t
+  :config
+  (setenv "GOPATH" "~/projects/go")
+  (add-hook 'go-mode-hook 'auto-complete-for-go)
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (local-set-key (kbd "M-.") 'godef-jump) ; Godef jump key binding
+              (local-set-key (kbd "M-*") 'pop-tag-mark))))
+
+(use-package go-autocomplete
+  :ensure t
+  :config
+  (add-hook 'go-mode-hook (lambda () (auto-complete-mode 1))))
