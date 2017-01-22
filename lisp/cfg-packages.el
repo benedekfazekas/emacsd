@@ -1,4 +1,4 @@
-(defun my/magit-cursor-fix ()
+(defun bf/magit-cursor-fix ()
   (beginning-of-buffer)
   (when (looking-at "#")
     (forward-line 2)))
@@ -12,7 +12,7 @@
  (set-default 'magit-revert-buffers 'silent)
  (set-default 'magit-no-confirm '(stage-all-changes
                                   unstage-all-changes))
- (add-hook 'git-commit-mode-hook 'my/magit-cursor-fix))
+ (add-hook 'git-commit-mode-hook bf/magit-cursor-fix))
 
 (use-package
  paredit
@@ -94,14 +94,17 @@
 ;; Clojure
 ;;;;;;;;;;;;;;
 
+(defun bf/fancify-symbols ()
+  (push '("fn" . (?· (Br . Bl) ?λ)) prettify-symbols-alist)
+  (push '("#(" . (?ƒ (Br . Bl) ?\()) prettify-symbols-alist)
+  (push '("#{" . (?∈ (Br . Bl) ?\{)) prettify-symbols-alist))
+
 (use-package
  clojure-mode
  :ensure t
  :config
  (add-hook 'clojure-mode-hook 'paredit-mode)
- (add-hook 'clojure-mode-hook
-          (lambda ()
-            (push '("fn" . (?· (Br . Bl) ?λ)) prettify-symbols-alist))))
+ (add-hook 'clojure-mode-hook 'bf/fancify-symbols))
 
 (use-package
  cider
@@ -127,6 +130,7 @@
  ;; use pprint for now
  (setq cider-pprint-fn 'pprint)
  (add-hook 'cider-repl-mode-hook 'paredit-mode)
+ (add-hook 'cider-repl-mode-hook 'bf/fancify-symbols)
  (add-hook 'cider-mode-hook #'eldoc-mode)
  :bind (("C-c n c" . nrepl-close)
         ("C-c n q" . cider-quit)
@@ -203,6 +207,10 @@
   :config
   (setq restclient-same-buffer-response nil))
 
+;;;;;
+;; Go
+;;;;;
+
 (use-package go-mode
   :ensure t
   :config
@@ -217,3 +225,10 @@
   :ensure t
   :config
   (add-hook 'go-mode-hook (lambda () (auto-complete-mode 1))))
+
+;; Go ends here
+
+(use-package disable-mouse
+  :ensure t
+  :config
+  (global-disable-mouse-mode))
