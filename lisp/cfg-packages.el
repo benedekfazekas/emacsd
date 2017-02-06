@@ -1,14 +1,13 @@
-(defun bf/magit-cursor-fix ()
-  (beginning-of-buffer)
-  (when (looking-at "#")
-    (forward-line 2)))
-
 (use-package
  magit
  :ensure t
  :pin melpa-stable
  :bind ("C-x g" . magit-status)
  :config
+ (defun bf/magit-cursor-fix ()
+   (beginning-of-buffer)
+   (when (looking-at "#")
+     (forward-line 2)))
  (set-default 'magit-revert-buffers 'silent)
  (set-default 'magit-no-confirm '(stage-all-changes
                                   unstage-all-changes))
