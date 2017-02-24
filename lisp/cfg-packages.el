@@ -231,3 +231,12 @@
   :ensure t
   :config
   (global-disable-mouse-mode))
+
+;;;;;;;
+;; Ruby
+;;;;;;;
+
+(use-package robe
+  :ensure t
+  :config
+  (add-hook 'ruby-mode-hook 'robe-mode))

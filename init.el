@@ -16,7 +16,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+    (robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
  '(safe-local-variable-values
    (quote
     ((checkdoc-package-keywords-flag)
