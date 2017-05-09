@@ -16,10 +16,11 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless clj-refactor company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+    (package-lint clj-refactor inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
  '(safe-local-variable-values
    (quote
-    ((checkdoc-package-keywords-flag)
+    ((clojure-defun-style-default-indent . t)
+     (checkdoc-package-keywords-flag)
      (bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
      (ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
      (ffip-find-options . "-not -regex \".*out-.*\"")))))

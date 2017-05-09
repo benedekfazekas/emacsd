@@ -17,6 +17,7 @@
  paredit
  :ensure t
  :pin melpa-stable
+ :bind ("C-M-g" . paredit-forward-down)
  :config
  (add-hook 'lisp-mode-hook 'paredit-mode)
  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
@@ -102,11 +103,17 @@
  clojure-mode
  :ensure t
  :config
+ (setq clojure-align-forms-automatically t)
  (add-hook 'clojure-mode-hook 'paredit-mode)
  (add-hook 'clojure-mode-hook 'bf/fancify-symbols))
 
 (use-package
- cider
+  inf-clojure
+  :disabled
+  :ensure t)
+
+(use-package
+  cider
  :ensure t
  :config
  ;; cider result with nice prefix
@@ -128,6 +135,8 @@
  (setq cider-repl-toggle-pretty-printing t)
  ;; use pprint for now
  (setq cider-pprint-fn 'pprint)
+ ;; log nrepl messages
+ ;(setq nrepl-log-messages t)
  (add-hook 'cider-repl-mode-hook 'paredit-mode)
  (add-hook 'cider-repl-mode-hook 'bf/fancify-symbols)
  (add-hook 'cider-mode-hook #'eldoc-mode)
@@ -137,7 +146,7 @@
         ("<C-f11>" . cider-jack-in)))
 
 (use-package
- company
+  company
  :ensure t
  :config
  (add-hook 'cider-repl-mode-hook 'company-mode)
@@ -197,10 +206,10 @@
   ;; Fontify org-mode code blocks
   (setq org-src-fontify-natively t)
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "|" "DONE(d)")
-          (sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
+        '((sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
           (sequence "|" "CANCELLED(c)"))))
 
+org-use-fast-todo-selection
 (use-package restclient
   :ensure t
   :config
@@ -240,3 +249,12 @@
   :ensure t
   :config
   (add-hook 'ruby-mode-hook 'robe-mode))
+
+(use-package yaml-mode
+  :ensure t)
+
+(use-package snake-mode
+  :load-path "~/projects/snake-mode")
+
+(use-package package-lint
+  :ensure t)
