@@ -11,7 +11,7 @@
  (set-default 'magit-revert-buffers 'silent)
  (set-default 'magit-no-confirm '(stage-all-changes
                                   unstage-all-changes))
- (add-hook 'git-commit-mode-hook bf/magit-cursor-fix))
+ (add-hook 'git-commit-mode-hook 'bf/magit-cursor-fix))
 
 (use-package
  paredit
@@ -156,6 +156,8 @@
  clj-refactor
  :ensure t
  :config
+ ;; make sure seq version is newer than built in
+ ;(require 'seq-25)
  (add-hook
   'clojure-mode-hook
   (lambda ()
@@ -177,6 +179,13 @@
  ;;(setq cljr-populate-artifact-cache-on-startup nil)
  ;; feel free to eval the project
  (setq cljr-warn-on-eval nil))
+
+(use-package
+  sayid
+  :ensure t
+  :config
+  (eval-after-load 'clojure-mode
+   '(sayid-setup-package)))
 
 ;; clojure related ends
 

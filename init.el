@@ -16,7 +16,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (package-lint clj-refactor inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+    (clj-refactor seq sayid package-lint inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
  '(safe-local-variable-values
    (quote
     ((clojure-defun-style-default-indent . t)
