@@ -263,6 +263,7 @@ org-use-fast-todo-selection
   :ensure t)
 
 (use-package snake-mode
+  :disabled
   :load-path "~/projects/snake-mode")
 
 (use-package package-lint
