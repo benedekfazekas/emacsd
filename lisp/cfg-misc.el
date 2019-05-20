@@ -7,9 +7,9 @@
   (toggle-frame-maximized))
 
 (global-set-key (kbd "C-x M-f") 'bf-toggle-maximized-with-font)
-
+(display-pixel-width)
 (defun bf--maxframe ()
-  (if (> (display-pixel-width) 1280)
+  (if (> (display-pixel-width) 1440)
       (bf-toggle-maximized-with-font)
     (toggle-frame-maximized)))
 

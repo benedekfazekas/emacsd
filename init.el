@@ -16,7 +16,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (clj-refactor seq sayid package-lint inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+    (lsp-java company-lsp lsp-ui ht lsp-mode org-mode org-plus-contrib flycheck-joker clj-refactor seq sayid package-lint inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
  '(safe-local-variable-values
    (quote
     ((clojure-defun-style-default-indent . t)
@@ -54,7 +54,8 @@
 
 (dolist (source
          '(("melpa" . "https://melpa.org/packages/")
-           ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")))
+           ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
+           ("org" . "http://orgmode.org/elpa/")))
   (add-to-list 'package-archives source t))
 
 ;; keep the installed packages in .emacs.d
