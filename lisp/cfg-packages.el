@@ -101,6 +101,7 @@
 
 (use-package
  clojure-mode
+ :pin melpa-stable
  :ensure t
  :config
  (setq clojure-align-forms-automatically t)
@@ -114,6 +115,7 @@
 
 (use-package
   cider
+ :pin melpa-stable
  :ensure t
  :config
  ;; cider result with nice prefix
@@ -182,10 +184,38 @@
 
 (use-package
   sayid
-  :ensure t
+  ;:ensure t
+  :disabled
   :config
-  (eval-after-load 'clojure-mode
-   '(sayid-setup-package)))
+  ;; (eval-after-load 'clojure-mode
+  ;;  '(sayid-setup-package))
+  )
+
+;;clojure-lsp
+
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :config
+  (add-to-list 'lsp-language-id-configuration '(clojure-mode . "clojure-mode"))
+  :init
+  (setq lsp-enable-indentation nil)
+  (add-hook 'clojure-mode-hook #'lsp)
+  (add-hook 'clojurec-mode-hook #'lsp)
+  (add-hook 'clojurescript-mode-hook #'lsp))
+
+;; (use-package lsp-java
+;;   :ensure t
+;;   :after lsp
+;;   :config (add-hook 'java-mode-hook 'lsp))
+
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :commands lsp-ui-mode)
+
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp)
 
 ;; clojure related ends
 
@@ -209,7 +239,9 @@
   (setq auto-mode-alist (cons '("\\.markdown" . markdown-mode) auto-mode-alist))
   (setq auto-mode-alist (cons '("\\.md" . markdown-mode) auto-mode-alist)))
 
-(use-package org-mode
+(use-package org
+  :defer t
+  :ensure t
   :config
   (setq org-export-html-postamble nil)
   ;; Fontify org-mode code blocks
@@ -218,11 +250,11 @@
         '((sequence "TODO(t)" "|" "READY(r)" "DONE(d)")
           (sequence "|" "CANCELLED(c)"))))
 
-org-use-fast-todo-selection
-(use-package restclient
-  :ensure t
-  :config
-  (setq restclient-same-buffer-response nil))
+;;org-use-fast-todo-selection
+;; (use-package restclient
+;;   :ensure t
+;;   :config
+;;   (setq restclient-same-buffer-response nil))
 
 ;;;;;
 ;; Go
@@ -231,7 +263,7 @@ org-use-fast-todo-selection
 (use-package go-mode
   :ensure t
   :config
-  (setenv "GOPATH" "~/projects/go")
+  (setenv "GOPATH" "~/go")
   (add-hook 'go-mode-hook 'auto-complete-for-go)
   (add-hook 'go-mode-hook
             (lambda ()
@@ -267,4 +299,7 @@ org-use-fast-todo-selection
   :load-path "~/projects/snake-mode")
 
 (use-package package-lint
+  :ensure t)
+
+(use-package flycheck-joker
   :ensure t)
