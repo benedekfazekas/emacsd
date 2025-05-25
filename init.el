@@ -15,15 +15,37 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (lsp-java company-lsp lsp-ui ht lsp-mode org-mode org-plus-contrib flycheck-joker clj-refactor seq sayid package-lint inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd web-mode markdown-mode nameless company cider clojure-mode smart-mode-line yasnippet rainbow-delimiters paredit magit color-theme-sanityinc-tomorrow exec-path-from-shell use-package)))
+   '(tide kotlin-mode gptel org-mind-map chess pygn-mode pgyn-mode magit-gh-pulls web-mode company-lsp lsp-mode speed-type parseedn lsp-ui ht org-mode org-plus-contrib flycheck-joker clj-refactor seq sayid package-lint inf-clojure yaml-mode robe disable-mouse go-autocomplete auto-complete go-mode haml-mode restclient xkcd markdown-mode nameless company cider clojure-mode paredit magit color-theme-sanityinc-tomorrow use-package))
  '(safe-local-variable-values
-   (quote
-    ((clojure-defun-style-default-indent . t)
+   '((cider-clojure-cli-global-options . "-A:dev")
+     (cider-ns-refresh-after-fn . "integrant.repl/resume")
+     (cider-ns-refresh-before-fn . "integrant.repl/suspend")
+     (clojure-align-forms-automatically nil)
+     (cljr-populate-artifact-cache-on-startup nil)
+     (cljr-warn-on-eval t)
+     (cljr-eagerly-build-asts-on-startup nil)
+     (elisp-lint-indent-specs
+      (if-let* . 2)
+      (when-let* . 1)
+      (let* . defun)
+      (nrepl-dbind-response . 2)
+      (cider-save-marker . 1)
+      (cider-propertize-region . 1)
+      (cider-map-repls . 1)
+      (cider--jack-in . 1)
+      (cider--make-result-overlay . 1)
+      (insert-label . defun)
+      (insert-align-label . defun)
+      (insert-rect . defun)
+      (cl-defun . 2)
+      (with-parsed-tramp-file-name . 2)
+      (thread-first . 1)
+      (thread-last . 1))
+     (clojure-defun-style-default-indent . t)
      (checkdoc-package-keywords-flag)
      (bug-reference-bug-regexp . "#\\(?2:[[:digit:]]+\\)")
      (ffip-patterns "*.org" "*.rb" "*.sh" "*.md" "*.css" "*.scss" "Rakefile" "Procfile" "Capfile" "*.sql" "*.json" "*.haml" "*.js")
-     (ffip-find-options . "-not -regex \".*out-.*\"")))))
+     (ffip-find-options . "-not -regex \".*out-.*\""))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -54,8 +76,9 @@
 
 (dolist (source
          '(("melpa" . "https://melpa.org/packages/")
-           ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
-           ("org" . "http://orgmode.org/elpa/")))
+           ("melpa-stable" . "https://stable.melpa.org/packages/")
+           ;; ("org" . "http://orgmode.org/elpa/")
+           ))
   (add-to-list 'package-archives source t))
 
 ;; keep the installed packages in .emacs.d

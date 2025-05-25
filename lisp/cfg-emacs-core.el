@@ -34,7 +34,7 @@
 
 ;; set a nice split window threshold
 (setq split-width-threshold 160)
-(setq split-height-threshold 90)
+(setq split-height-threshold 120)
 
 ;; go on, prettify
 (global-prettify-symbols-mode 1)
@@ -42,11 +42,19 @@
 ;; Parenthesis
 (show-paren-mode)
 
-;; Dont like trailing whitespaces
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(defun delete-trailing-whitespace-sans-md ()
+  (message "major-mode: %s" (buffer-local-value 'major-mode (current-buffer)))
+  (when (not (string= "markdown-mode" (buffer-local-value 'major-mode (current-buffer))))
+    (delete-trailing-whitespace)))
+
+;; Dont like trailing whitespaces, except in markdown
+(add-hook 'before-save-hook 'delete-trailing-whitespace-sans-md)
 
 ;; load sql creds from home
 (load "~/sqldefs.el")
+
+;; load google secrets
+(load "~/gsecrets.el")
 
 ;; no indent with tabs
 (setq-default indent-tabs-mode nil)
@@ -95,3 +103,12 @@
       (make-directory parent-directory t))))
 
 (add-to-list 'find-file-not-found-functions 'my-create-non-existent-directory)
+
+(setq treesit-extra-load-path '("/Users/fazekasbenedek/.tree-sitter/bin"))
+
+(define-derived-mode typescriptreact-mode typescript-ts-mode "TypeScript TSX")
+
+;; use our derived mode for tsx files
+(add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
